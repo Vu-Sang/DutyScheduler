@@ -1,0 +1,6 @@
+{
+  "name": "DutyScheduler",
+  "description": "Hệ thống quản lý lịch trực và phân công nhân sự DutyScheduler (Operational Control)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
