@@ -552,23 +552,25 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           // Pick 1st employee (has lowest cumulative count including last month's deficit)
           const emp1 = availableEmps[0];
-          dutyCountMap.set(emp1.id, (dutyCountMap.get(emp1.id) || 0) + 1);
           assignedEmpsForDay.push(emp1);
 
           // Pick 2nd employee (2nd lowest cumulative count)
           if (availableEmps.length > 1) {
             const emp2 = availableEmps[1];
-            dutyCountMap.set(emp2.id, (dutyCountMap.get(emp2.id) || 0) + 1);
             assignedEmpsForDay.push(emp2);
           } else {
-            dutyCountMap.set(emp1.id, (dutyCountMap.get(emp1.id) || 0) + 1);
             assignedEmpsForDay.push(emp1);
           }
 
-          assignedEmpsForDay.forEach((emp, idx) => {
-            const role = dutyRoles[idx % dutyRoles.length];
-            const partner = assignedEmpsForDay[1 - idx];
-            const partnerText = partner && partner.id !== emp.id ? ` (Cùng trực với ${partner.name})` : '';
+          dutyRoles.forEach((role, idx) => {
+            const empIdx = idx % assignedEmpsForDay.length;
+            const emp = assignedEmpsForDay[empIdx];
+            
+            dutyCountMap.set(emp.id, (dutyCountMap.get(emp.id) || 0) + 1);
+
+            const partners = assignedEmpsForDay.filter(e => e.id !== emp.id);
+            const partnerNames = Array.from(new Set(partners.map(p => p.name)));
+            const partnerText = partnerNames.length > 0 ? ` (Cùng trực với ${partnerNames.join(', ')})` : '';
             const isPastDay = dateStr < todayDateStr;
 
             generatedAssignments.push({

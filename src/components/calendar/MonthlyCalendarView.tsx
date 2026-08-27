@@ -231,10 +231,10 @@ export const MonthlyCalendarView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Grid: Calendar Left (3 Cols) + Employee Summary Right (1 Col) */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-        {/* LEFT: Monthly Calendar Grid (3 columns) */}
-        <div className="xl:col-span-3 bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-hidden">
+      {/* Main Grid: Calendar Left (4 Cols) + Employee Summary Right (1 Col) */}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+        {/* LEFT: Monthly Calendar Grid (4 columns) */}
+        <div className="xl:col-span-4 bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-hidden">
           {/* Days of Week Header */}
           <div className="grid grid-cols-7 border-b border-[#c3c6d6] bg-[#f1f3ff] text-center font-bold text-[13px] text-[#041b3c]">
             {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((dayName, idx) => (
@@ -255,7 +255,7 @@ export const MonthlyCalendarView: React.FC = () => {
               <div
                 key={`${cell.dateStr}-${idx}`}
                 onClick={() => cell.isCurrentMonth && isAdmin && handleAddDutyOnDate(cell.dateStr)}
-                className={`min-h-[125px] p-2 bg-white flex flex-col justify-between transition-colors relative group ${
+                className={`min-h-[150px] p-2 bg-white flex flex-col transition-colors relative group ${
                   !cell.isCurrentMonth ? 'bg-[#f9f9ff]/40 text-[#737685]/50' : isAdmin ? 'hover:bg-[#f1f3ff]/60 cursor-pointer' : ''
                 }`}
               >
@@ -288,41 +288,76 @@ export const MonthlyCalendarView: React.FC = () => {
                 </div>
 
                 {/* Day Duty Assignments Badges - RED PENALTY ICON IF PENALIZED */}
-                <div className="space-y-1.5 flex-1 overflow-y-auto max-h-[95px] no-scrollbar">
-                  {cell.dayAssignments.map(duty => {
-                    const isPenalized = duty.penaltyStatus === 'penalty';
+                <div className="space-y-1.5 flex-1 mt-1">
+                  {Object.values(
+                    cell.dayAssignments.reduce((acc, duty) => {
+                      if (!acc[duty.assignedEmployeeId]) {
+                        acc[duty.assignedEmployeeId] = {
+                          employeeName: duty.assignedEmployeeName,
+                          duties: [],
+                          isPenalized: false,
+                          hasCompleted: false,
+                          primaryColor: duty.categoryColor || '#003d9b'
+                        };
+                      }
+                      acc[duty.assignedEmployeeId].duties.push(duty);
+                      if (duty.penaltyStatus === 'penalty') acc[duty.assignedEmployeeId].isPenalized = true;
+                      if (duty.status === 'completed') acc[duty.assignedEmployeeId].hasCompleted = true;
+                      return acc;
+                    }, {} as Record<string, any>)
+                  ).map((group: any) => {
+                    const { employeeName, duties, isPenalized, hasCompleted, primaryColor } = group;
+                    
                     return (
                       <div
-                        key={duty.id}
+                        key={duties[0].id}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedAssignmentForDetail(duty);
+                          setSelectedAssignmentForDetail(duties[0]);
                         }}
-                        className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex items-center justify-between cursor-pointer transition-all hover:shadow-xs border-l-3 ${
+                        className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-3 ${
                           isPenalized
                             ? 'bg-[#ffdad6]/40 border-l-[#ba1a1a] border-[#ba1a1a]/30'
                             : 'bg-white'
                         }`}
                         style={{
-                          borderLeftColor: isPenalized ? '#ba1a1a' : (duty.categoryColor || '#003d9b'),
-                          backgroundColor: isPenalized ? '#ffdad6]/50' : `${duty.categoryColor || '#003d9b'}12`,
-                          borderColor: isPenalized ? '#ba1a1a]/40' : `${duty.categoryColor || '#003d9b'}30`,
+                          borderLeftColor: isPenalized ? '#ba1a1a' : primaryColor,
+                          backgroundColor: isPenalized ? '#ffdad6]/50' : `${primaryColor}12`,
+                          borderColor: isPenalized ? '#ba1a1a]/40' : `${primaryColor}30`,
                         }}
                       >
-                        {/* Prominent Employee Name with Maximum Width */}
-                        <span className={`font-bold text-[12px] truncate leading-tight flex-1 ${isPenalized ? 'text-[#ba1a1a]' : 'text-[#041b3c]'}`}>
-                          {duty.assignedEmployeeName}
-                        </span>
-
-                        {isPenalized ? (
-                          <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm trực nhật">
-                            warning
+                        <div className="flex items-center justify-between">
+                          <span className={`font-bold text-[12px] truncate leading-tight flex-1 ${isPenalized ? 'text-[#ba1a1a]' : 'text-[#041b3c]'}`}>
+                            {employeeName}
                           </span>
-                        ) : duty.status === 'completed' ? (
-                          <span className="material-symbols-outlined text-[13px] text-[#006c47] shrink-0 ml-1" title="Đã nộp ảnh">
-                            check_circle
-                          </span>
-                        ) : null}
+                          {isPenalized ? (
+                            <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm trực nhật">
+                              warning
+                            </span>
+                          ) : hasCompleted ? (
+                            <span className="material-symbols-outlined text-[13px] text-[#006c47] shrink-0 ml-1" title="Đã nộp ảnh">
+                              check_circle
+                            </span>
+                          ) : null}
+                        </div>
+                        {duties.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {duties.map((d: any) => (
+                              <span 
+                                key={d.id} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAssignmentForDetail(d);
+                                }}
+                                className="material-symbols-outlined text-[14px] bg-white/60 rounded shadow-2xs hover:bg-white hover:scale-110 transition-all p-[1px]" 
+                                style={{ color: d.categoryColor || '#003d9b' }}
+                                title={d.categoryName}
+                              >
+                                {d.categoryIcon || 'task_alt'}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

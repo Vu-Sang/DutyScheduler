@@ -12,6 +12,7 @@ export const ShiftDetailModal: React.FC = () => {
     currentUser,
     setProofModalOpen,
     setDutyForProof,
+    assignments,
   } = useDuty();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +29,11 @@ export const ShiftDetailModal: React.FC = () => {
 
   const duty = selectedAssignmentForDetail;
   const isAdmin = currentUser.isManager || currentUser.roleType === 'admin';
+
+  // Tìm tất cả các công việc của nhân viên này trong cùng ngày
+  const relatedAssignments = assignments 
+    ? assignments.filter(a => a.date === duty.date && a.assignedEmployeeId === duty.assignedEmployeeId) 
+    : [];
 
   const handleStartEdit = () => {
     setEditEmployeeId(duty.assignedEmployeeId);
@@ -113,7 +119,7 @@ export const ShiftDetailModal: React.FC = () => {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="bg-white rounded-lg max-w-lg w-full shadow-2xl border border-[#c3c6d6] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#c3c6d6] flex justify-between items-center bg-[#f1f3ff]">
+        <div className={`px-6 py-4 border-b border-[#c3c6d6] flex justify-between items-center bg-[#f1f3ff] ${relatedAssignments.length > 1 ? 'pb-2' : ''}`}>
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-[#003d9b]">task_alt</span>
             <h3 className="text-[18px] font-bold text-[#041b3c]">Chi tiết Trực nhật</h3>
@@ -125,6 +131,35 @@ export const ShiftDetailModal: React.FC = () => {
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
+
+        {/* Tabs for Multiple Assignments */}
+        {relatedAssignments.length > 1 && (
+          <div className="flex px-6 bg-[#f1f3ff] border-b border-[#c3c6d6] gap-2 overflow-x-auto no-scrollbar">
+            {relatedAssignments.map((a) => {
+              const isActive = a.id === duty.id;
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => {
+                    setSelectedAssignmentForDetail(a);
+                    setIsEditing(false);
+                    setIsAdminAnnotating(false);
+                  }}
+                  className={`px-3 py-2.5 text-[13px] font-bold border-b-[3px] -mb-[1px] transition-colors whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'border-[#003d9b] text-[#003d9b]'
+                      : 'border-transparent text-[#737685] hover:text-[#041b3c]'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">{a.categoryIcon || 'task_alt'}</span>
+                    {a.categoryName}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Content */}
         <div className="p-6 space-y-5 overflow-y-auto flex-1 text-[14px]">
