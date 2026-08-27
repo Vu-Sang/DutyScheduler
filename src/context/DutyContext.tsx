@@ -345,7 +345,6 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         admin_notes: newAssignment.adminNotes,
         penalty_status: newAssignment.penaltyStatus,
         fine_amount: newAssignment.fineAmount,
-        penalty_image: newAssignment.penaltyImage,
       });
     } catch {
       // fallback
@@ -369,7 +368,6 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         admin_notes: updated.adminNotes,
         penalty_status: updated.penaltyStatus,
         fine_amount: updated.fineAmount,
-        penalty_image: updated.penaltyImage,
       }).eq('id', updated.id);
     } catch {
       // fallback
@@ -600,6 +598,15 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Sync batch to Supabase
         try {
+          // 1. Delete old assignments for this month in Supabase first
+          const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+          const lastDay = `${year}-${String(month + 1).padStart(2, '0')}-31`;
+          await supabase.from('duty_assignments')
+             .delete()
+             .gte('date', firstDay)
+             .lte('date', lastDay);
+
+          // 2. Insert new ones
           const rowsToInsert = generatedAssignments.map(a => ({
             id: a.id,
             date: a.date,
@@ -616,11 +623,10 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
             admin_notes: a.adminNotes,
             penalty_status: a.penaltyStatus,
             fine_amount: a.fineAmount,
-            penalty_image: a.penaltyImage,
           }));
           await supabase.from('duty_assignments').insert(rowsToInsert);
-        } catch {
-          // fallback
+        } catch (err) {
+          console.error("Auto schedule sync error:", err);
         }
 
         try {
