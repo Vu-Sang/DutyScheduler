@@ -228,6 +228,23 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     fetchSupabaseData();
+
+    // Lắng nghe sự kiện thay đổi dữ liệu từ Supabase (Realtime)
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public' },
+        (payload) => {
+          // Tự động tải lại dữ liệu mới nhất mỗi khi có thay đổi từ thiết bị khác
+          fetchSupabaseData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
