@@ -11,12 +11,18 @@ export const EmployeeModal: React.FC = () => {
   } = useDuty();
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     if (editingEmployee) {
       setName(editingEmployee.name);
+      setUsername(editingEmployee.username || '');
+      setPassword(editingEmployee.password || '');
     } else {
       setName('');
+      setUsername('');
+      setPassword('');
     }
   }, [editingEmployee, employeeModalOpen]);
 
@@ -30,6 +36,8 @@ export const EmployeeModal: React.FC = () => {
       updateEmployee({
         ...editingEmployee,
         name: name.trim(),
+        username: username.trim(),
+        password: password.trim(),
       });
     } else {
       addEmployee({
@@ -45,10 +53,14 @@ export const EmployeeModal: React.FC = () => {
         maxOffDaysPerMonth: 4,
         skills: ['Quét nhà', 'Lau nhà', 'Đổ rác'],
         isActive: true,
+        username: username.trim(),
+        password: password.trim(),
       });
     }
 
     setName('');
+    setUsername('');
+    setPassword('');
     setEmployeeModalOpen(false);
   };
 
@@ -62,7 +74,7 @@ export const EmployeeModal: React.FC = () => {
               {editingEmployee ? 'edit' : 'person_add'}
             </span>
             <h3 className="text-[18px] font-bold text-[#041b3c]">
-              {editingEmployee ? 'Chỉnh sửa tên nhân viên' : 'Thêm nhân viên mới'}
+              {editingEmployee ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
             </h3>
           </div>
           <button
@@ -73,10 +85,10 @@ export const EmployeeModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Form - Only Name Field */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 text-[14px]">
+        {/* Form Fields */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-[14px]">
           <div>
-            <label className="block text-[13px] font-bold text-[#041b3c] uppercase tracking-wider mb-2">
+            <label className="block text-[12px] font-bold text-[#041b3c] uppercase tracking-wider mb-1.5">
               Họ và tên nhân viên *
             </label>
             <input
@@ -86,19 +98,47 @@ export const EmployeeModal: React.FC = () => {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="VD: Nguyễn Văn A"
-              className="w-full px-4 py-3 border-2 border-[#c3c6d6] rounded-xl text-[16px] font-semibold text-[#041b3c] focus:border-[#003d9b] focus:ring-2 focus:ring-[#003d9b]/20 outline-none transition-all"
+              className="w-full px-3 py-2 border border-[#c3c6d6] rounded-lg text-[15px] font-semibold text-[#041b3c] focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none transition-all"
             />
-            <p className="text-[12px] text-[#737685] mt-1.5">
-              Chỉ cần nhập tên nhân viên để đưa vào hệ thống phân công lịch trực.
-            </p>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[12px] font-bold text-[#041b3c] uppercase tracking-wider mb-1.5">
+                Tài khoản đăng nhập
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="VD: nguyenvana"
+                className="w-full px-3 py-2 border border-[#c3c6d6] rounded-lg text-[14px] text-[#041b3c] focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-bold text-[#041b3c] uppercase tracking-wider mb-1.5">
+                Mật khẩu
+              </label>
+              <input
+                type="text"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Mật khẩu"
+                className="w-full px-3 py-2 border border-[#c3c6d6] rounded-lg text-[14px] text-[#041b3c] focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none transition-all"
+              />
+            </div>
+          </div>
+          
+          <p className="text-[12px] text-[#737685] mt-1.5 italic">
+            Tài khoản và mật khẩu dùng để nhân viên tự đăng nhập xem lịch trực hoặc quét khuôn mặt.
+          </p>
+
           {/* Footer */}
-          <div className="pt-4 border-t border-[#c3c6d6] flex justify-end gap-2">
+          <div className="pt-4 mt-2 border-t border-[#c3c6d6] flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setEmployeeModalOpen(false)}
-              className="px-5 py-2.5 border border-[#c3c6d6] rounded-lg text-[13px] font-semibold text-[#434654] hover:bg-[#f1f3ff]"
+              className="px-4 py-2 border border-[#c3c6d6] rounded-lg text-[13px] font-semibold text-[#434654] hover:bg-[#f1f3ff]"
             >
               Hủy
             </button>

@@ -65,6 +65,9 @@ export interface Employee {
   maxOffDaysPerMonth: number;
   skills: string[];
   isActive: boolean;
+  username?: string;
+  password?: string;
+  faceDescriptor?: string;
 }
 
 export interface NotificationItem {

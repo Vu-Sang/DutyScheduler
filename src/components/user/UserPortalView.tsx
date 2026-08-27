@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useDuty } from '../../context/DutyContext';
 import { DutyAssignment } from '../../types';
+import { FaceRegistration } from './FaceRegistration';
 
 export const UserPortalView: React.FC = () => {
   const {
@@ -14,10 +15,13 @@ export const UserPortalView: React.FC = () => {
     setProofModalOpen,
     setDutyForProof,
     setSelectedAssignmentForDetail,
+    employees,
+    updateEmployee,
   } = useDuty();
 
   const [activeViewMode, setActiveViewMode] = useState<'timetable' | 'list' | 'month'>('timetable');
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [showFaceRegistration, setShowFaceRegistration] = useState(false);
 
   const myEmployeeId = currentUser.employeeId || currentUser.id;
 
@@ -86,6 +90,23 @@ export const UserPortalView: React.FC = () => {
   const handleOpenProofModal = (duty: DutyAssignment) => {
     setDutyForProof(duty);
     setProofModalOpen(true);
+  };
+
+  const handleFaceSuccess = async (descriptor: string) => {
+    try {
+      const targetEmp = employees.find(e => e.id === myEmployeeId);
+      if (targetEmp) {
+        await updateEmployee({
+          ...targetEmp,
+          faceDescriptor: descriptor
+        });
+        alert("✅ Dữ liệu sinh trắc khuôn mặt của bạn đã được cập nhật an toàn vào hệ thống. Lần sau bạn có thể Đăng nhập bằng khuôn mặt!");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Lỗi khi lưu dữ liệu khuôn mặt");
+    }
+    setShowFaceRegistration(false);
   };
 
   const months = [
@@ -586,6 +607,24 @@ export const UserPortalView: React.FC = () => {
               })}
             </div>
           )}
+        </div>
+      )}
+      {/* Face Registration Modal */}
+      {showFaceRegistration && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-white/20 overflow-hidden">
+            <div className="bg-gradient-to-r from-[#003d9b] to-[#0052cc] p-6 text-white text-center">
+              <span className="material-symbols-outlined text-4xl mb-2 text-white/90">face_retouching_natural</span>
+              <h2 className="text-[20px] font-bold">Cập nhật Khuôn mặt (Face ID)</h2>
+              <p className="text-white/80 text-[14px] mt-1">Dùng để đăng nhập nhanh không cần mật khẩu</p>
+            </div>
+            <div className="p-6 bg-[#f9f9ff]">
+              <FaceRegistration 
+                onSuccess={handleFaceSuccess}
+                onCancel={() => setShowFaceRegistration(false)}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

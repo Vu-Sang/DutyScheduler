@@ -177,6 +177,9 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
             maxOffDaysPerMonth: e.max_off_days_per_month || 4,
             skills: ['Quét nhà', 'Lau nhà'],
             isActive: e.is_active !== false,
+            username: e.username,
+            password: e.password,
+            faceDescriptor: e.face_descriptor,
           })));
         }
 
@@ -752,6 +755,9 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatar: newEmp.avatar,
         accent_color: newEmp.accentColor,
         is_active: newEmp.isActive,
+        username: newEmp.username,
+        password: newEmp.password,
+        face_descriptor: newEmp.faceDescriptor,
       });
     } catch {
       // fallback
@@ -770,6 +776,9 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone: updated.phone,
         avatar: updated.avatar,
         is_active: updated.isActive,
+        username: updated.username,
+        password: updated.password,
+        face_descriptor: updated.faceDescriptor,
       }).eq('id', updated.id);
     } catch {
       // fallback
