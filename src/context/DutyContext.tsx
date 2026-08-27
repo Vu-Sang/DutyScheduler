@@ -346,7 +346,7 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAssignments(prev => [newAssignment, ...prev]);
 
     try {
-      await supabase.from('duty_assignments').insert({
+      const { error } = await supabase.from('duty_assignments').insert({
         id: newAssignment.id,
         date: newAssignment.date,
         category_id: newAssignment.categoryId,
@@ -363,8 +363,12 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         penalty_status: newAssignment.penaltyStatus,
         fine_amount: newAssignment.fineAmount,
       });
-    } catch {
-      // fallback
+      if (error) {
+        console.error("addAssignment supabase error:", error);
+        alert("Lỗi lưu DB: " + error.message + (error.details ? ` - ${error.details}` : ''));
+      }
+    } catch (err) {
+      console.error("addAssignment JS error:", err);
     }
   };
 
@@ -386,8 +390,8 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         penalty_status: updated.penaltyStatus,
         fine_amount: updated.fineAmount,
       }).eq('id', updated.id);
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("updateAssignment supabase error:", err);
     }
   };
 
@@ -396,8 +400,8 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       await supabase.from('duty_assignments').delete().eq('id', id);
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("deleteAssignment supabase error:", err);
     }
   };
 
@@ -416,8 +420,8 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
       for (const a of monthAssigns) {
         await supabase.from('duty_assignments').delete().eq('id', a.id);
       }
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("clearMonthAssignments supabase error:", err);
     }
   };
 
@@ -444,8 +448,8 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         completion_notes: notes,
         completed_at: completedAt,
       }).eq('id', assignmentId);
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("completeDuty supabase error:", err);
     }
 
     try {
@@ -641,9 +645,13 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
             penalty_status: a.penaltyStatus,
             fine_amount: a.fineAmount,
           }));
-          await supabase.from('duty_assignments').insert(rowsToInsert);
+          const { error } = await supabase.from('duty_assignments').insert(rowsToInsert);
+          if (error) {
+            console.error("autoScheduleDuty supabase error:", error);
+            alert("Lỗi lưu DB: " + error.message + (error.details ? ` - ${error.details}` : ''));
+          }
         } catch (err) {
-          console.error("Auto schedule sync error:", err);
+          console.error("autoScheduleDuty JS error:", err);
         }
 
         try {
