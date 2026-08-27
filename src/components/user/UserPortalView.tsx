@@ -348,127 +348,162 @@ export const UserPortalView: React.FC = () => {
           </div>
 
           {/* Timetable Grid Table */}
-          <div className="bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-[#f1f3ff] border-b border-[#c3c6d6] text-[#041b3c] text-[13px] font-bold">
-                  <th className="p-3.5 w-[200px] border-r border-[#c3c6d6] text-center">Nhiệm vụ trực nhật</th>
-                  {currentWeekDays.map(day => (
-                    <th
-                      key={day.dateStr}
-                      className={`p-3.5 text-center border-r border-[#c3c6d6] last:border-r-0 ${
-                        day.isToday ? 'bg-[#003d9b] text-white' : ''
-                      }`}
-                    >
-                      <div className="font-extrabold">{day.label}</div>
-                      <div className={`text-[11px] font-normal ${day.isToday ? 'text-white/80' : 'text-[#737685]'}`}>
-                        {day.dateFormatted}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#c3c6d6] text-[13px]">
-                {categories.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="p-6 text-center text-[#737685] italic">
-                      Chưa có danh mục công việc nào
-                    </td>
-                  </tr>
-                ) : (
-                  categories.map(cat => (
-                    <tr key={cat.id} className="hover:bg-[#f9f9ff]">
-                      {/* Task Name Column */}
-                      <td className="p-3.5 border-r border-[#c3c6d6] bg-[#f9f9ff] font-bold text-[#041b3c]">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="material-symbols-outlined text-[20px]"
-                            style={{ color: cat.color || '#003d9b' }}
-                          >
-                            {cat.icon || 'task_alt'}
-                          </span>
-                          <div>
-                            <p className="leading-tight">{cat.name}</p>
-                            {cat.description && (
-                              <p className="text-[11px] text-[#737685] font-normal mt-0.5">{cat.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
+          {/* Timetable Grid */}
+          <div className="bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-hidden mt-6">
+            {/* Days of Week Header */}
+            <div className="grid grid-cols-7 border-b border-[#c3c6d6] bg-[#f1f3ff] text-center font-bold text-[13px] text-[#041b3c]">
+              {currentWeekDays.map(day => (
+                <div
+                  key={day.dateStr}
+                  className={`py-3 border-r border-[#c3c6d6] last:border-r-0 relative ${
+                    day.isToday ? 'bg-[#003d9b] text-white shadow-[inset_0_0_15px_rgba(0,0,0,0.2)]' : ''
+                  }`}
+                >
+                  {day.isToday && (
+                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#ffca81] text-[#5e3c00] text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm border border-white whitespace-nowrap z-10">
+                      HÔM NAY
+                    </div>
+                  )}
+                  <div className="font-extrabold">{day.label}</div>
+                  <div className={`text-[11px] font-normal ${day.isToday ? 'text-white/80' : 'text-[#737685]'}`}>
+                    {day.dateFormatted}
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                      {/* 7 Days Columns */}
-                      {currentWeekDays.map(day => {
-                        const dayAssignments = assignments.filter(
-                          a => a.date === day.dateStr && a.categoryId === cat.id
-                        );
-                        const isMyShift = dayAssignments.some(a => a.assignedEmployeeId === myEmployeeId);
+            {/* Calendar Days Matrix */}
+            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-[#c3c6d6] bg-[#c3c6d6]">
+              {currentWeekDays.map(day => {
+                const dayAssignments = assignments.filter(a => a.date === day.dateStr);
+                const isMyShift = dayAssignments.some(a => a.assignedEmployeeId === myEmployeeId);
 
-                        return (
-                          <td
-                            key={day.dateStr}
-                            className={`p-2.5 border-r border-[#c3c6d6] last:border-r-0 align-top ${
-                              isMyShift ? 'bg-[#003d9b]/10 font-semibold' : ''
-                            }`}
-                          >
-                            {dayAssignments.length === 0 ? (
-                              <span className="text-[11px] text-[#737685]/40 italic block text-center py-2">
-                                Chưa xếp
-                              </span>
-                            ) : (
-                              <div className="space-y-1.5">
-                                {dayAssignments.map(duty => {
-                                  const isMine = duty.assignedEmployeeId === myEmployeeId;
-                                  const isPenalized = duty.penaltyStatus === 'penalty';
-                                  return (
-                                    <div
-                                      key={duty.id}
-                                      onClick={() => setSelectedAssignmentForDetail(duty)}
-                                      className={`p-2 rounded-lg text-[12px] cursor-pointer transition-all border shadow-2xs ${
-                                        isPenalized
-                                          ? 'bg-[#ba1a1a] text-white border-[#ba1a1a] font-bold ring-2 ring-[#ba1a1a]/30'
-                                          : isMine
-                                          ? 'bg-[#003d9b] text-white border-[#003d9b] font-bold ring-2 ring-[#003d9b]/30'
-                                          : 'bg-white text-[#041b3c] border-[#c3c6d6] hover:bg-[#f1f3ff]'
-                                      }`}
+                return (
+                  <div
+                    key={day.dateStr}
+                    className={`min-h-[200px] p-2 flex flex-col transition-colors relative ${
+                      day.isToday 
+                        ? 'bg-[#fff9e6] shadow-[inset_0_0_20px_rgba(255,202,129,0.15)]' 
+                        : 'bg-white'
+                    } ${
+                      isMyShift && !day.isToday ? 'bg-[#003d9b]/5' : ''
+                    }`}
+                  >
+                    {/* HÔM NAY border overlay */}
+                    {day.isToday && (
+                      <div className="absolute inset-0 border-2 border-[#ffca81] pointer-events-none z-10" />
+                    )}
+                    {/* Day Duty Assignments Badges */}
+                    <div className="space-y-2 flex-1">
+                      {dayAssignments.length === 0 ? (
+                        <span className="text-[11px] text-[#737685]/40 italic block text-center py-4">
+                          Chưa xếp
+                        </span>
+                      ) : (
+                        Object.values(
+                          dayAssignments.reduce((acc, duty) => {
+                            if (!acc[duty.assignedEmployeeId]) {
+                              acc[duty.assignedEmployeeId] = {
+                                employeeName: duty.assignedEmployeeName,
+                                duties: [],
+                                isPenalized: false,
+                                hasCompleted: false,
+                                primaryColor: duty.categoryColor || '#003d9b'
+                              };
+                            }
+                            acc[duty.assignedEmployeeId].duties.push(duty);
+                            if (duty.penaltyStatus === 'penalty') acc[duty.assignedEmployeeId].isPenalized = true;
+                            if (duty.status === 'completed') acc[duty.assignedEmployeeId].hasCompleted = true;
+                            return acc;
+                          }, {} as Record<string, any>)
+                        ).map((group: any) => {
+                          const { employeeName, duties, isPenalized, hasCompleted, primaryColor } = group;
+                          const isMine = duties[0].assignedEmployeeId === myEmployeeId;
+                          
+                          return (
+                            <div
+                              key={duties[0].id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAssignmentForDetail(duties[0]);
+                              }}
+                              className={`px-2.5 py-2 rounded-md text-[12px] flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-[4px] relative overflow-hidden ${
+                                isPenalized
+                                  ? 'bg-[#ffdad6]/40 border-l-[#ba1a1a] border-[#ba1a1a]/30'
+                                  : isMine
+                                  ? 'bg-[#003d9b]/15 border-l-[#003d9b] border-[#003d9b]/50 shadow-[0_2px_10px_rgba(0,61,155,0.15)] ring-1 ring-[#003d9b]/20'
+                                  : 'bg-white'
+                              }`}
+                              style={(!isPenalized && !isMine) ? {
+                                borderLeftColor: primaryColor,
+                                backgroundColor: `${primaryColor}12`,
+                                borderColor: `${primaryColor}30`,
+                                borderWidth: '1px',
+                                borderLeftWidth: '4px',
+                              } : { borderWidth: '1px', borderLeftWidth: '4px' }}
+                            >
+                              <div className="flex items-center justify-between relative z-10">
+                                <span className={`font-extrabold text-[13px] truncate leading-tight flex flex-1 items-center gap-1 ${isPenalized ? 'text-[#ba1a1a]' : isMine ? 'text-[#003d9b]' : 'text-[#041b3c]'}`}>
+                                  {employeeName}
+                                  {isMine && <span className="bg-[#003d9b] text-white text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider leading-none">Bạn</span>}
+                                </span>
+                                {isPenalized ? (
+                                  <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm">
+                                    warning
+                                  </span>
+                                ) : hasCompleted ? (
+                                  <span className="material-symbols-outlined text-[14px] text-[#006c47] shrink-0 ml-1" title="Đã hoàn thành">
+                                    check_circle
+                                  </span>
+                                ) : null}
+                              </div>
+                              {duties.length > 0 && (
+                                <div className="flex flex-col gap-1.5 mt-2">
+                                  {duties.map((d: any) => (
+                                    <div 
+                                      key={d.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedAssignmentForDetail(d);
+                                      }}
+                                      className="flex items-center justify-between group/task hover:bg-white/60 p-1 rounded transition-colors"
                                     >
-                                      <div className="flex items-center justify-between gap-1">
-                                        <span className="truncate flex-1">{duty.assignedEmployeeName}</span>
-                                        {isPenalized ? (
-                                          <span className="material-symbols-outlined text-[14px] text-white font-extrabold" title="Bị phạt vi phạm">
-                                            warning
-                                          </span>
-                                        ) : duty.status === 'completed' ? (
-                                          <span className="material-symbols-outlined text-[14px] text-[#82f9be]">
-                                            check_circle
-                                          </span>
-                                        ) : null}
+                                      <div className="flex items-center gap-1.5 min-w-0">
+                                        <span 
+                                          className="material-symbols-outlined text-[16px] shrink-0" 
+                                          style={{ color: d.categoryColor || '#003d9b' }}
+                                        >
+                                          {d.categoryIcon || 'task_alt'}
+                                        </span>
+                                        <span className="truncate text-[11px] font-semibold text-[#434654]" title={d.categoryName}>{d.categoryName}</span>
                                       </div>
-
-                                      {isMine && duty.status !== 'completed' && !isPenalized && (
+                                      
+                                      {isMine && d.status !== 'completed' && !isPenalized && (
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            handleOpenProofModal(duty);
+                                            handleOpenProofModal(d);
                                           }}
-                                          className="mt-1.5 w-full py-1 bg-white text-[#003d9b] rounded text-[10px] font-extrabold hover:bg-white/90 flex items-center justify-center gap-1 shadow-2xs"
+                                          className="ml-1 opacity-0 group-hover/task:opacity-100 py-0.5 px-1.5 bg-[#003d9b] text-white rounded text-[9px] font-extrabold hover:bg-[#0052cc] transition-all flex items-center gap-1 shrink-0"
+                                          title="Nộp ảnh minh chứng"
                                         >
-                                          <span className="material-symbols-outlined text-[12px]">add_a_photo</span>
-                                          Nộp ảnh minh chứng
+                                          <span className="material-symbols-outlined text-[11px]">add_a_photo</span>
+                                          Nộp
                                         </button>
                                       )}
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

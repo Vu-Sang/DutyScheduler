@@ -307,6 +307,7 @@ export const MonthlyCalendarView: React.FC = () => {
                     }, {} as Record<string, any>)
                   ).map((group: any) => {
                     const { employeeName, duties, isPenalized, hasCompleted, primaryColor } = group;
+                    const isMine = duties[0].assignedEmployeeId === (currentUser.employeeId || currentUser.id);
                     
                     return (
                       <div
@@ -315,20 +316,25 @@ export const MonthlyCalendarView: React.FC = () => {
                           e.stopPropagation();
                           setSelectedAssignmentForDetail(duties[0]);
                         }}
-                        className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-3 ${
+                        className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-[3px] border relative overflow-hidden ${
                           isPenalized
                             ? 'bg-[#ffdad6]/40 border-l-[#ba1a1a] border-[#ba1a1a]/30'
+                            : isMine
+                            ? 'bg-[#003d9b]/15 border-[#003d9b]/40 shadow-[0_2px_10px_rgba(0,61,155,0.15)] ring-1 ring-[#003d9b]/20'
                             : 'bg-white'
                         }`}
-                        style={{
-                          borderLeftColor: isPenalized ? '#ba1a1a' : primaryColor,
-                          backgroundColor: isPenalized ? '#ffdad6]/50' : `${primaryColor}12`,
-                          borderColor: isPenalized ? '#ba1a1a]/40' : `${primaryColor}30`,
+                        style={(!isPenalized && !isMine) ? {
+                          borderLeftColor: primaryColor,
+                          backgroundColor: `${primaryColor}12`,
+                          borderColor: `${primaryColor}30`,
+                        } : {
+                          borderLeftColor: isPenalized ? '#ba1a1a' : '#003d9b'
                         }}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className={`font-bold text-[12px] truncate leading-tight flex-1 ${isPenalized ? 'text-[#ba1a1a]' : 'text-[#041b3c]'}`}>
+                        <div className="flex items-center justify-between relative z-10">
+                          <span className={`font-extrabold text-[12px] truncate leading-tight flex flex-1 items-center gap-1 ${isPenalized ? 'text-[#ba1a1a]' : isMine ? 'text-[#003d9b]' : 'text-[#041b3c]'}`}>
                             {employeeName}
+                            {isMine && <span className="bg-[#003d9b] text-white text-[9px] px-1 py-0.5 rounded uppercase tracking-wider leading-none">Bạn</span>}
                           </span>
                           {isPenalized ? (
                             <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm trực nhật">
