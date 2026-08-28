@@ -1,4 +1,4 @@
-export type TabType = 'calendar' | 'offdays' | 'categories' | 'employees' | 'dashboard' | 'my_schedule';
+export type TabType = 'calendar' | 'offdays' | 'categories' | 'employees' | 'dashboard' | 'my_schedule' | 'my_summary';
 
 export interface DutyCategory {
   id: string;
@@ -67,7 +67,6 @@ export interface Employee {
   isActive: boolean;
   username?: string;
   password?: string;
-  faceDescriptor?: string;
 }
 
 export interface NotificationItem {

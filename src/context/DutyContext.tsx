@@ -264,7 +264,7 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: 'admin-1',
       name: 'Quản trị viên',
       role: 'Admin Phân công',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwzmS2tLHrDw7gYxfSc72nGSgCDVFG5oCFAbV5nePBUJGqRoTPqsAPSPye_Q8b6TlsDA_2dl5T0H_oekSJun8azXQSGFudLDHF8iiom5NTsoQRbK4SGwbABk-MghyowTRKrZuJViy_ESEdatQRcRx_qR5mCpBMPpS2Dtyk5qX6Z0OfxQjvAPB4Ecxu-geEjEeuG3O0BndcLXF8Pnlb33b0BxyneLde8CA9eZ45Yqks4cxb9wLQ7c0r',
+      avatar: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%23003d9b"/><circle cx="50" cy="38" r="22" fill="%23ffffff"/><path d="M 20,88 C 20,64 32,54 50,54 C 68,54 80,64 80,88 Z" fill="%23ffffff"/></svg>',
       isManager: true,
       roleType: 'admin',
     };
@@ -751,13 +751,9 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: newEmp.role,
         department: newEmp.department,
         email: newEmp.email,
-        phone: newEmp.phone,
-        avatar: newEmp.avatar,
-        accent_color: newEmp.accentColor,
         is_active: newEmp.isActive,
         username: newEmp.username,
         password: newEmp.password,
-        face_descriptor: newEmp.faceDescriptor,
       });
     } catch {
       // fallback
@@ -778,7 +774,6 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
         is_active: updated.isActive,
         username: updated.username,
         password: updated.password,
-        face_descriptor: updated.faceDescriptor,
       }).eq('id', updated.id);
     } catch {
       // fallback

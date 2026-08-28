@@ -13,11 +13,14 @@ export const ShiftDetailModal: React.FC = () => {
     setProofModalOpen,
     setDutyForProof,
     assignments,
+    categories,
   } = useDuty();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [editCategoryId, setEditCategoryId] = useState('');
   const [editEmployeeId, setEditEmployeeId] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [editDate, setEditDate] = useState('');
 
   // Admin Penalty states
   const [isAdminAnnotating, setIsAdminAnnotating] = useState(false);
@@ -29,22 +32,41 @@ export const ShiftDetailModal: React.FC = () => {
 
   const duty = selectedAssignmentForDetail;
   const isAdmin = currentUser.isManager || currentUser.roleType === 'admin';
+  const myEmployeeId = currentUser.employeeId || currentUser.id;
+  const isMyShift = duty.assignedEmployeeId === myEmployeeId;
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isToday = duty.date === todayStr;
+
+  // Tìm hạng mục tương ứng để lấy mô tả công việc
+  const matchingCategory = categories.find(
+    c => c.id === duty.categoryId || c.name.toLowerCase() === duty.categoryName.toLowerCase()
+  );
+  const categoryDescription = matchingCategory?.description;
 
   // Tìm tất cả các công việc của nhân viên này trong cùng ngày
-  const relatedAssignments = assignments 
-    ? assignments.filter(a => a.date === duty.date && a.assignedEmployeeId === duty.assignedEmployeeId) 
+  const relatedAssignments = assignments
+    ? assignments.filter(a => a.date === duty.date && a.assignedEmployeeId === duty.assignedEmployeeId)
     : [];
 
   const handleStartEdit = () => {
+    setEditCategoryId(duty.categoryId);
     setEditEmployeeId(duty.assignedEmployeeId);
-    setEditNotes(duty.notes || '');
+    setEditNotes(duty.notes || categoryDescription || '');
+    setEditDate(duty.date);
     setIsEditing(true);
   };
 
   const handleSaveEdit = () => {
     const assignedEmp = employees.find(e => e.id === editEmployeeId) || employees[0];
+    const selectedCat = categories.find(c => c.id === editCategoryId) || categories[0];
     const updated: DutyAssignment = {
       ...duty,
+      date: editDate || duty.date,
+      categoryId: selectedCat ? selectedCat.id : duty.categoryId,
+      categoryName: selectedCat ? selectedCat.name : duty.categoryName,
+      categoryIcon: selectedCat ? selectedCat.icon : duty.categoryIcon,
+      categoryColor: selectedCat ? selectedCat.color : duty.categoryColor,
       assignedEmployeeId: assignedEmp.id,
       assignedEmployeeName: assignedEmp.name,
       assignedEmployeeRole: assignedEmp.role,
@@ -145,11 +167,10 @@ export const ShiftDetailModal: React.FC = () => {
                     setIsEditing(false);
                     setIsAdminAnnotating(false);
                   }}
-                  className={`px-3 py-2.5 text-[13px] font-bold border-b-[3px] -mb-[1px] transition-colors whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? 'border-[#003d9b] text-[#003d9b]'
-                      : 'border-transparent text-[#737685] hover:text-[#041b3c]'
-                  }`}
+                  className={`px-3 py-2.5 text-[13px] font-bold border-b-[3px] -mb-[1px] transition-colors whitespace-nowrap cursor-pointer ${isActive
+                    ? 'border-[#003d9b] text-[#003d9b]'
+                    : 'border-transparent text-[#737685] hover:text-[#041b3c]'
+                    }`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px]">{a.categoryIcon || 'task_alt'}</span>
@@ -182,13 +203,12 @@ export const ShiftDetailModal: React.FC = () => {
             </div>
 
             <span
-              className={`px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 ${
-                duty.penaltyStatus === 'penalty'
-                  ? 'bg-[#ffdad6] text-[#ba1a1a] border border-[#ba1a1a]/40 font-extrabold'
-                  : duty.status === 'completed'
+              className={`px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 ${duty.penaltyStatus === 'penalty'
+                ? 'bg-[#ffdad6] text-[#ba1a1a] border border-[#ba1a1a]/40 font-extrabold'
+                : duty.status === 'completed'
                   ? 'bg-[#82f9be]/30 text-[#006c47] border border-[#006c47]/30'
                   : 'bg-[#ffca81]/30 text-[#5e3c00]'
-              }`}
+                }`}
             >
               <span className="material-symbols-outlined text-[14px]">
                 {duty.penaltyStatus === 'penalty' ? 'warning' : duty.status === 'completed' ? 'check_circle' : 'pending'}
@@ -301,18 +321,59 @@ export const ShiftDetailModal: React.FC = () => {
             </div>
           )}
 
-          {/* Regular Notes */}
-          {duty.notes && (
-            <div className="flex items-start gap-2 bg-[#f1f3ff]/60 p-4 rounded-lg border border-[#c3c6d6]/60">
-              <span className="material-symbols-outlined text-[18px] text-[#003d9b] shrink-0">
-                description
-              </span>
-              <div>
-                <span className="font-semibold text-[#041b3c]">Ghi chú nhiệm vụ: </span>
-                <span className="text-[#434654]">{duty.notes}</span>
+          {/* Single Category Description & Prominent Admin Special Notice */}
+          {(() => {
+            // 1. Task Description directly from Category
+            const descText = categoryDescription || duty.categoryName;
+
+            // 2. Extract Custom Admin Notice (e.g. "bạn cần hoàn thành sớm nay có khách")
+            let customNotice = duty.notes || '';
+
+            // Extract partner info if present
+            const partnerMatch = customNotice.match(/\(Cùng trực với [^)]+\)/);
+            const partnerInfo = partnerMatch ? partnerMatch[0] : '';
+
+            // Clean custom notice
+            if (categoryDescription && customNotice.startsWith(categoryDescription)) {
+              customNotice = customNotice.replace(categoryDescription, '').trim();
+            }
+            customNotice = customNotice.replace(/\(Cùng trực với [^)]+\)/, '').trim();
+
+            return (
+              <div className="space-y-3">
+                {/* 1. SINGLE CLEAN MÔ TẢ CÔNG VIỆC CARD */}
+                <div className="flex items-start gap-3 bg-[#f1f3ff] p-4 rounded-xl border border-[#c3c6d6] shadow-xs">
+                  <span className="material-symbols-outlined text-[22px] text-[#003d9b] shrink-0 mt-0.5">
+                    assignment
+                  </span>
+                  <div className="flex-1 space-y-1">
+                    <p className="font-extrabold text-[#041b3c] text-[14px]">Mô tả công việc :</p>
+                    <p className="text-[#434654] text-[13px] font-medium leading-relaxed">{descText}</p>
+
+                    {partnerInfo && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-extrabold text-[#003d9b] bg-white px-2.5 py-1 rounded-md border border-[#003d9b]/20">
+                        <span className="material-symbols-outlined text-[14px]">group</span>
+                        {partnerInfo.replace(/[()]/g, '')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. PROMINENT HIGHLIGHTED CARD FOR SPECIAL ADMIN NOTICES */}
+                {customNotice && (
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-[#fff9e6] via-[#fff3cc] to-[#ffecb3] border-2 border-[#ffb300] text-[#5e3c00] shadow-md space-y-2 animate-in fade-in">
+                    <div className="flex items-center gap-2 font-black text-[13px] text-[#d97706] uppercase tracking-wide">
+                      <span className="material-symbols-outlined text-[22px] text-[#d97706]">campaign</span>
+                      <span>Lưu ý quan trọng từ Admin:</span>
+                    </div>
+                    <p className="text-[14px] font-black text-[#041b3c] leading-relaxed bg-white/80 p-3 rounded-lg border border-[#ffca81]">
+                      "{customNotice}"
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ADMIN PENALTY FORM (ADMIN ONLY) */}
           {isAdmin && isAdminAnnotating && (
@@ -421,48 +482,99 @@ export const ShiftDetailModal: React.FC = () => {
 
           {/* Edit Mode Inline (ADMIN ONLY) */}
           {isAdmin && isEditing && (
-            <div className="p-4 bg-[#f9f9ff] border border-[#003d9b]/40 rounded-lg space-y-3 animate-in fade-in">
-              <h5 className="font-bold text-[14px] text-[#003d9b]">Phân công lại nhân viên:</h5>
+            <div className="p-4 bg-[#f9f9ff] border border-[#003d9b]/40 rounded-xl space-y-4 animate-in fade-in">
+              <div className="flex items-center gap-2 border-b border-[#003d9b]/20 pb-2">
+                <span className="material-symbols-outlined text-[#003d9b]">edit_note</span>
+                <h5 className="font-extrabold text-[15px] text-[#003d9b]">Chỉnh Sửa Ca Trực & Phân Công</h5>
+              </div>
+
+              {/* 1. Category / Task Selection */}
               <div>
+                <label className="block text-[12px] font-extrabold text-[#041b3c] mb-1">
+                  1. Tên / Hạng mục nhiệm vụ:
+                </label>
                 <select
-                  value={editEmployeeId}
-                  onChange={e => setEditEmployeeId(e.target.value)}
-                  className="w-full p-2 border border-[#c3c6d6] rounded text-[13px] bg-white cursor-pointer"
+                  value={editCategoryId}
+                  onChange={e => {
+                    const catId = e.target.value;
+                    setEditCategoryId(catId);
+                    const found = categories.find(c => c.id === catId);
+                    if (found && found.description && !editNotes) {
+                      setEditNotes(found.description);
+                    }
+                  }}
+                  className="w-full p-2.5 border border-[#c3c6d6] rounded-lg text-[13px] bg-white font-bold text-[#041b3c] cursor-pointer outline-none focus:border-[#003d9b]"
                 >
-                  {employees.map(e => (
-                    <option key={e.id} value={e.id}>
-                      {e.name} ({e.role})
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* 2. Employee Assignment Selection */}
               <div>
-                <label className="block text-[12px] font-semibold text-[#434654] mb-1">
-                  Ghi chú mới:
+                <label className="block text-[12px] font-extrabold text-[#041b3c] mb-1">
+                  2. Nhân viên phụ trách:
                 </label>
-                <textarea
-                  rows={2}
-                  value={editNotes}
-                  onChange={e => setEditNotes(e.target.value)}
-                  className="w-full p-2 border border-[#c3c6d6] rounded text-[13px]"
+                <select
+                  value={editEmployeeId}
+                  onChange={e => setEditEmployeeId(e.target.value)}
+                  className="w-full p-2.5 border border-[#c3c6d6] rounded-lg text-[13px] bg-white font-bold text-[#041b3c] cursor-pointer outline-none focus:border-[#003d9b]"
+                >
+                  {employees.map(e => (
+                    <option key={e.id} value={e.id}>
+                      {e.name} ({e.role} - {e.department})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 3. Date Selection */}
+              <div>
+                <label className="block text-[12px] font-extrabold text-[#041b3c] mb-1">
+                  3. Ngày thực hiện:
+                </label>
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={e => setEditDate(e.target.value)}
+                  className="w-full p-2.5 border border-[#c3c6d6] rounded-lg text-[13px] bg-white font-bold text-[#041b3c] outline-none focus:border-[#003d9b]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              {/* 4. Admin Special Notice / Instructions */}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-[12px] font-extrabold text-[#041b3c]">
+                    4. 📢 Lưu ý quan trọng / Dặn dò đặc biệt cho nhân viên (Bôi vàng nổi bật):
+                  </label>
+                </div>
+                <textarea
+                  rows={3}
+                  value={editNotes}
+                  onChange={e => setEditNotes(e.target.value)}
+                  placeholder="Nhập dặn dò đặc biệt (VD: Bạn cần hoàn thành sớm nay có khách, dọn kỹ bàn làm việc)..."
+                  className="w-full p-2.5 border-2 border-[#ffca81] bg-[#fff9e6] rounded-lg text-[13px] text-[#041b3c] font-bold outline-none focus:border-[#d97706]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#c3c6d6]/60">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 border border-[#c3c6d6] text-[12px] font-semibold rounded text-[#434654]"
+                  className="px-4 py-2 border border-[#c3c6d6] text-[13px] font-bold rounded-lg text-[#434654] hover:bg-[#f1f3ff]"
                 >
-                  Huỷ sửa
+                  Hủy
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveEdit}
-                  className="px-4 py-1.5 bg-[#003d9b] text-white text-[12px] font-semibold rounded shadow-xs"
+                  className="px-5 py-2 bg-[#003d9b] hover:bg-[#0052cc] text-white text-[13px] font-extrabold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
-                  Lưu thay đổi
+                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  Lưu Thay Đổi
                 </button>
               </div>
             </div>
@@ -495,7 +607,7 @@ export const ShiftDetailModal: React.FC = () => {
                       className="px-3.5 py-2 border border-[#003d9b] text-[#003d9b] hover:bg-[#0052cc]/10 rounded-md font-semibold text-[13px] flex items-center gap-1 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
-                      Đổi người
+                      Chỉnh sửa ca trực
                     </button>
 
                     <button
@@ -507,15 +619,29 @@ export const ShiftDetailModal: React.FC = () => {
                   </div>
                 </>
               ) : (
-                /* EMPLOYEE / USER ROLE ONLY: NO DELETE, NO PENALTY, NO EDIT EMPLOYEE */
-                <div className="w-full flex justify-between items-center">
-                  <button
-                    onClick={handleOpenUploadProof}
-                    className="px-4 py-2 bg-[#003d9b] hover:bg-[#0052cc] text-white rounded-md font-bold text-[13px] flex items-center gap-2 shadow-xs cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">add_a_photo</span>
-                    {duty.proofImage ? 'Cập nhật lại ảnh minh chứng' : 'Nộp ảnh minh chứng trực nhật'}
-                  </button>
+                /* EMPLOYEE / USER ROLE ONLY: CAN ONLY REPORT FOR OWN SHIFT ON TODAY */
+                <div className="w-full flex justify-between items-center gap-2">
+                  {isMyShift ? (
+                    isToday ? (
+                      <button
+                        onClick={handleOpenUploadProof}
+                        className="px-4 py-2 bg-[#003d9b] hover:bg-[#0052cc] text-white rounded-md font-bold text-[13px] flex items-center gap-2 shadow-xs cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">add_a_photo</span>
+                        {duty.proofImage ? 'Cập nhật lại ảnh minh chứng' : 'Nộp ảnh minh chứng trực nhật'}
+                      </button>
+                    ) : (
+                      <div className="px-3 py-1.5 bg-[#f1f3ff] border border-[#c3c6d6] text-[#737685] rounded-md text-[12px] font-semibold flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">event_busy</span>
+                        Chỉ được báo cáo vào đúng ngày trực ({duty.date})
+                      </div>
+                    )
+                  ) : (
+                    <div className="px-3 py-1.5 bg-[#f1f3ff] border border-[#c3c6d6] text-[#737685] rounded-md text-[12px] font-semibold flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px]">info</span>
+                      Ca trực của {duty.assignedEmployeeName} (Chỉ xem chi tiết)
+                    </div>
+                  )}
 
                   <button
                     onClick={() => setSelectedAssignmentForDetail(null)}

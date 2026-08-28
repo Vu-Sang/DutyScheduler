@@ -13,10 +13,23 @@ export default defineConfig(() => {
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modifyâ€”file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      proxy: {
+        // Proxy Google Translate TTS to bypass browser CORS restriction
+        '/gtts': {
+          target: 'https://translate.google.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/gtts/, '/translate_tts'),
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Referer: 'https://translate.google.com/',
+          },
+        },
+      },
     },
   };
 });

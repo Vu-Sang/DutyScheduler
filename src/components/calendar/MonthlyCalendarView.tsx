@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDuty } from '../../context/DutyContext';
 import { DutyAssignment } from '../../types';
 
@@ -17,9 +17,27 @@ export const MonthlyCalendarView: React.FC = () => {
     clearMonthAssignments,
     searchQuery,
     currentUser,
+    setActiveTab,
   } = useDuty();
 
   const isAdmin = currentUser.isManager || currentUser.roleType === 'admin';
+  const [mobileSelectedDayStr, setMobileSelectedDayStr] = useState<string | null>(null);
+
+  const realTodayStr = useMemo(() => {
+    const realToday = new Date();
+    return `${realToday.getFullYear()}-${String(realToday.getMonth() + 1).padStart(2, '0')}-${String(realToday.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const activeMobileDayStr = useMemo(() => {
+    const monthPrefix = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}`;
+    if (mobileSelectedDayStr && mobileSelectedDayStr.startsWith(monthPrefix)) {
+      return mobileSelectedDayStr;
+    }
+    const realToday = new Date();
+    const isCurrentRealMonth = realToday.getFullYear() === selectedYear && realToday.getMonth() === selectedMonth;
+    if (isCurrentRealMonth) return realTodayStr;
+    return `${monthPrefix}-01`;
+  }, [mobileSelectedDayStr, selectedYear, selectedMonth, realTodayStr]);
 
   const months = [
     { value: 0, label: 'Tháng 1' },
@@ -164,30 +182,34 @@ export const MonthlyCalendarView: React.FC = () => {
 
   return (
     <div id="monthly-calendar-view" className="space-y-6 animate-in fade-in duration-200">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h2 className="text-[28px] sm:text-[32px] font-bold text-[#041b3c] tracking-tight">
-            Lịch trực tháng
-          </h2>
-          <p className="text-[14px] text-[#434654] mt-1 font-medium">
-            Quản lý phân công vệ sinh & lao động hàng ngày (2 người/ngày: Quét nhà, lau nhà, đổ rác).
-          </p>
+      {/* Page Header Banner */}
+      <div className="bg-gradient-to-r from-[#003d9b] via-[#004bb8] to-[#0052cc] rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-[26px]">calendar_month</span>
+          </div>
+          <div>
+            <h2 className="text-[22px] sm:text-[26px] font-black tracking-tight text-white flex items-center gap-2">
+              Lịch Trực Full Tháng
+            </h2>
+            <p className="text-[13px] text-white/85 font-medium mt-0.5">
+              Quản lý ma trận phân công vệ sinh & lao động hàng ngày trong toàn bộ tháng.
+            </p>
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2">
+        {/* Controls Bar */}
+        <div className="flex flex-wrap items-center gap-2 bg-white/15 backdrop-blur-md p-1.5 rounded-xl border border-white/30 shrink-0 self-stretch sm:self-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-white/80 text-[20px] ml-1">filter_alt</span>
             <select
               id="month-select"
               value={selectedMonth}
               onChange={e => setSelectedMonth(Number(e.target.value))}
-              className="bg-white border border-[#c3c6d6] text-[#041b3c] font-medium text-[14px] px-3 py-2 rounded-md focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none cursor-pointer"
+              className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
             >
               {months.map(m => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
+                <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
 
@@ -195,33 +217,38 @@ export const MonthlyCalendarView: React.FC = () => {
               id="year-select"
               value={selectedYear}
               onChange={e => setSelectedYear(Number(e.target.value))}
-              className="bg-white border border-[#c3c6d6] text-[#041b3c] font-medium text-[14px] px-3 py-2 rounded-md focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none cursor-pointer"
+              className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
             >
               {years.map(y => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
+                <option key={y} value={y}>{y}</option>
               ))}
             </select>
           </div>
 
-          {/* ADMIN ONLY CONTROLS */}
+          <button
+            onClick={() => setActiveTab('my_schedule')}
+            className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 text-white font-extrabold text-[13px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer border border-white/30"
+            title="Chuyển sang thời khóa biểu 7 ngày theo tuần"
+          >
+            <span className="material-symbols-outlined text-[18px]">view_week</span>
+            Xem lịch trực tuần
+          </button>
+
           {isAdmin && (
             <>
-              {/* Delete All Month Duties Button */}
               <button
                 onClick={handleClearMonth}
-                className="border border-[#ba1a1a] text-[#ba1a1a] hover:bg-[#ba1a1a]/10 px-3.5 py-2 rounded-md font-semibold text-[13px] transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                title="Xóa toàn bộ lịch trực trong tháng được chọn"
+                className="px-3 py-1.5 bg-[#ba1a1a] hover:bg-[#9c1212] text-white font-extrabold text-[12px] rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="Xóa tất cả ca trực của tháng này"
               >
-                <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
+                <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
                 Xóa lịch tháng
               </button>
 
               <button
                 id="auto-schedule-btn"
                 onClick={() => setAutoScheduleModalOpen(true)}
-                className="bg-[#003d9b] hover:bg-[#0052cc] text-white px-4 py-2 rounded-md font-semibold text-[14px] transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 bg-white text-[#003d9b] hover:bg-white/90 font-extrabold text-[13px] rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
                 Tự động phân lịch
@@ -231,145 +258,353 @@ export const MonthlyCalendarView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Grid: Calendar Left (4 Cols) + Employee Summary Right (1 Col) */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-        {/* LEFT: Monthly Calendar Grid (4 columns) */}
-        <div className="xl:col-span-4 bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-hidden">
-          {/* Days of Week Header */}
-          <div className="grid grid-cols-7 border-b border-[#c3c6d6] bg-[#f1f3ff] text-center font-bold text-[13px] text-[#041b3c]">
-            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((dayName, idx) => (
-              <div
-                key={dayName}
-                className={`py-3 border-r border-[#c3c6d6] last:border-r-0 ${
-                  idx === 6 ? 'text-[#ba1a1a]' : ''
-                }`}
-              >
-                {dayName}
+      {/* MOBILE VIEW: Compact Month Calendar Grid + Selected Day Agenda Cards (Visible on mobile, hidden on md+) */}
+      <div className="block md:hidden space-y-4">
+        {/* Compact Mini Month Grid */}
+        <div className="bg-white rounded-2xl border border-[#c3c6d6] shadow-xs p-3.5 space-y-2.5">
+          <div className="flex justify-between items-center px-1 pb-2 border-b border-[#f0f2f5]">
+            <h3 className="font-extrabold text-[15px] text-[#041b3c] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[#003d9b] text-[20px]">calendar_month</span>
+              Lịch Tháng {selectedMonth + 1}/{selectedYear}
+            </h3>
+            <span className="text-[11px] font-bold text-[#737685] bg-[#f1f3ff] px-2 py-0.5 rounded-full">
+              {monthAssignments.length} ca trực
+            </span>
+          </div>
+
+          {/* Day of Week Headers */}
+          <div className="grid grid-cols-7 text-center font-bold text-[12px] text-[#041b3c] py-1">
+            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d, i) => (
+              <div key={d} className={i === 6 ? 'text-[#ba1a1a]' : ''}>
+                {d}
               </div>
             ))}
           </div>
 
-          {/* Calendar Days Matrix */}
-          <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-[#c3c6d6] bg-[#c3c6d6]">
-            {calendarDays.map((cell, idx) => (
-              <div
-                key={`${cell.dateStr}-${idx}`}
-                onClick={() => cell.isCurrentMonth && isAdmin && handleAddDutyOnDate(cell.dateStr)}
-                className={`min-h-[150px] p-2 bg-white flex flex-col transition-colors relative group ${
-                  !cell.isCurrentMonth ? 'bg-[#f9f9ff]/40 text-[#737685]/50' : isAdmin ? 'hover:bg-[#f1f3ff]/60 cursor-pointer' : ''
-                }`}
-              >
-                {/* Day Header */}
-                <div className="flex justify-between items-center mb-1">
-                  <span
-                    className={`text-[13px] font-bold w-6 h-6 rounded-full flex items-center justify-center ${
-                      cell.isToday
-                        ? 'bg-[#003d9b] text-white shadow-xs'
-                        : cell.isCurrentMonth
-                        ? 'text-[#041b3c]'
-                        : 'text-[#737685]/50'
-                    }`}
-                  >
+          {/* Date Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((cell, idx) => {
+              const isSelected = activeMobileDayStr === cell.dateStr;
+              const hasDuties = cell.dayAssignments.length > 0;
+              const hasMyShift = cell.dayAssignments.some(a => a.assignedEmployeeId === (currentUser.employeeId || currentUser.id));
+              const hasPenalties = cell.dayAssignments.some(a => a.penaltyStatus === 'penalty');
+
+              return (
+                <button
+                  key={`${cell.dateStr}-${idx}`}
+                  disabled={!cell.isCurrentMonth}
+                  onClick={() => cell.isCurrentMonth && setMobileSelectedDayStr(cell.dateStr)}
+                  className={`aspect-square p-1 rounded-xl flex flex-col items-center justify-between transition-all relative border cursor-pointer ${
+                    !cell.isCurrentMonth
+                      ? 'opacity-25 border-transparent cursor-default'
+                      : isSelected
+                      ? 'bg-[#003d9b] text-white border-[#003d9b] shadow-sm font-bold scale-102'
+                      : cell.isToday
+                      ? 'bg-[#fff9e6] text-[#041b3c] border-[#ffca81] font-bold'
+                      : 'bg-[#f9f9ff] text-[#041b3c] border-[#e0e2ec] hover:border-[#003d9b]'
+                  }`}
+                >
+                  {/* Today Tag */}
+                  {cell.isToday && (
+                    <span className={`text-[7px] font-black uppercase px-1 py-0.2 rounded-full leading-none ${
+                      isSelected ? 'bg-[#ffca81] text-[#5e3c00]' : 'bg-[#003d9b] text-white'
+                    }`}>
+                      Nay
+                    </span>
+                  )}
+
+                  {/* Date Number */}
+                  <span className={`text-[12px] ${isSelected ? 'font-black text-white' : 'font-bold'}`}>
                     {cell.dateNumber}
                   </span>
 
-                  {cell.isCurrentMonth && isAdmin && (
+                  {/* Dots / Indicators */}
+                  {cell.isCurrentMonth && (
+                    <div className="flex items-center gap-0.5 mt-0.5">
+                      {hasPenalties ? (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" title="Bị phạt" />
+                      ) : hasMyShift ? (
+                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#82f9be]' : 'bg-[#003d9b]'}`} title="Ca của bạn" />
+                      ) : hasDuties ? (
+                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[#737685]'}`} title="Có ca trực" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Day Agenda Cards */}
+        {(() => {
+          const selectedCell = calendarDays.find(c => c.dateStr === activeMobileDayStr);
+          const dayAssignments = selectedCell ? selectedCell.dayAssignments : [];
+          const [y, m, d] = activeMobileDayStr.split('-').map(Number);
+          const formattedDate = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+          const isToday = activeMobileDayStr === realTodayStr;
+
+          return (
+            <div className="bg-white rounded-2xl p-4 border border-[#c3c6d6] shadow-xs space-y-3">
+              <div className="flex justify-between items-center border-b border-[#f0f2f5] pb-2.5">
+                <div>
+                  <h4 className="font-extrabold text-[15px] text-[#041b3c] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[#003d9b] text-[20px]">event_note</span>
+                    Lịch trực ngày {formattedDate}
+                  </h4>
+                  <p className="text-[12px] text-[#737685]">
+                    {dayAssignments.length > 0 ? `${dayAssignments.length} ca trực được phân công` : 'Chưa phân công ca trực nào'}
+                  </p>
+                </div>
+                {isToday && (
+                  <span className="px-2.5 py-1 bg-[#ffca81]/30 text-[#5e3c00] rounded-full text-[11px] font-extrabold border border-[#ffca81]">
+                    Hôm nay
+                  </span>
+                )}
+              </div>
+
+              {dayAssignments.length === 0 ? (
+                <div className="py-6 text-center text-[#737685] bg-[#f9f9ff] rounded-xl border border-dashed border-[#c3c6d6] space-y-2">
+                  <span className="material-symbols-outlined text-[36px] text-[#737685]/40">event_busy</span>
+                  <p className="text-[13px] font-medium">Chưa có ca trực nào vào ngày này</p>
+                  {isAdmin && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddDutyOnDate(cell.dateStr);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 text-[#003d9b] hover:bg-[#e0e8ff] p-0.5 rounded transition-all"
-                      title="Thêm nhiệm vụ"
+                      onClick={() => handleAddDutyOnDate(activeMobileDayStr)}
+                      className="px-3.5 py-1.5 bg-[#003d9b] hover:bg-[#0052cc] text-white rounded-lg text-[12px] font-bold inline-flex items-center gap-1 shadow-xs cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[16px]">add</span>
+                      <span className="material-symbols-outlined text-[15px]">add</span>
+                      Phân ca trực ngày này
                     </button>
                   )}
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  {dayAssignments.map(duty => {
+                    const isMine = duty.assignedEmployeeId === (currentUser.employeeId || currentUser.id);
+                    const isPenalized = duty.penaltyStatus === 'penalty';
+                    const isCompleted = duty.status === 'completed';
 
-                {/* Day Duty Assignments Badges - RED PENALTY ICON IF PENALIZED */}
-                <div className="space-y-1.5 flex-1 mt-1">
-                  {Object.values(
-                    cell.dayAssignments.reduce((acc, duty) => {
-                      if (!acc[duty.assignedEmployeeId]) {
-                        acc[duty.assignedEmployeeId] = {
-                          employeeName: duty.assignedEmployeeName,
-                          duties: [],
-                          isPenalized: false,
-                          hasCompleted: false,
-                          primaryColor: duty.categoryColor || '#003d9b'
-                        };
-                      }
-                      acc[duty.assignedEmployeeId].duties.push(duty);
-                      if (duty.penaltyStatus === 'penalty') acc[duty.assignedEmployeeId].isPenalized = true;
-                      if (duty.status === 'completed') acc[duty.assignedEmployeeId].hasCompleted = true;
-                      return acc;
-                    }, {} as Record<string, any>)
-                  ).map((group: any) => {
-                    const { employeeName, duties, isPenalized, hasCompleted, primaryColor } = group;
-                    const isMine = duties[0].assignedEmployeeId === (currentUser.employeeId || currentUser.id);
-                    
                     return (
                       <div
-                        key={duties[0].id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedAssignmentForDetail(duties[0]);
-                        }}
-                        className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-[3px] border relative overflow-hidden ${
+                        key={duty.id}
+                        onClick={() => setSelectedAssignmentForDetail(duty)}
+                        className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden space-y-2 ${
                           isPenalized
-                            ? 'bg-[#ffdad6]/40 border-l-[#ba1a1a] border-[#ba1a1a]/30'
+                            ? 'bg-[#ffdad6]/35 border-[#ba1a1a]/40'
                             : isMine
-                            ? 'bg-[#003d9b]/15 border-[#003d9b]/40 shadow-[0_2px_10px_rgba(0,61,155,0.15)] ring-1 ring-[#003d9b]/20'
-                            : 'bg-white'
+                            ? 'bg-[#003d9b]/5 border-[#003d9b]/40 ring-1 ring-[#003d9b]/20 shadow-xs'
+                            : 'bg-[#f9f9ff] border-[#c3c6d6]'
                         }`}
-                        style={(!isPenalized && !isMine) ? {
-                          borderLeftColor: primaryColor,
-                          backgroundColor: `${primaryColor}12`,
-                          borderColor: `${primaryColor}30`,
-                        } : {
-                          borderLeftColor: isPenalized ? '#ba1a1a' : '#003d9b'
-                        }}
                       >
-                        <div className="flex items-center justify-between relative z-10">
-                          <span className={`font-extrabold text-[12px] truncate leading-tight flex flex-1 items-center gap-1 ${isPenalized ? 'text-[#ba1a1a]' : isMine ? 'text-[#003d9b]' : 'text-[#041b3c]'}`}>
-                            {employeeName}
-                            {isMine && <span className="bg-[#003d9b] text-white text-[9px] px-1 py-0.5 rounded uppercase tracking-wider leading-none">Bạn</span>}
-                          </span>
-                          {isPenalized ? (
-                            <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm trực nhật">
-                              warning
-                            </span>
-                          ) : hasCompleted ? (
-                            <span className="material-symbols-outlined text-[13px] text-[#006c47] shrink-0 ml-1" title="Đã nộp ảnh">
-                              check_circle
-                            </span>
-                          ) : null}
-                        </div>
-                        {duties.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {duties.map((d: any) => (
-                              <span 
-                                key={d.id} 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedAssignmentForDetail(d);
-                                }}
-                                className="material-symbols-outlined text-[14px] bg-white/60 rounded shadow-2xs hover:bg-white hover:scale-110 transition-all p-[1px]" 
-                                style={{ color: d.categoryColor || '#003d9b' }}
-                                title={d.categoryName}
-                              >
-                                {d.categoryIcon || 'task_alt'}
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-[#003d9b]/10 text-[#003d9b] font-extrabold flex items-center justify-center text-[13px] border border-[#003d9b]/20">
+                              {duty.assignedEmployeeName.slice(0, 1)}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-extrabold text-[14px] text-[#041b3c]">
+                                {duty.assignedEmployeeName}
                               </span>
-                            ))}
+                              {isMine && (
+                                <span className="bg-[#003d9b] text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
+                                  Bạn
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        )}
+
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1 ${
+                            isPenalized
+                              ? 'bg-[#ba1a1a] text-white'
+                              : isCompleted
+                              ? 'bg-[#82f9be]/30 text-[#006c47]'
+                              : 'bg-[#ffca81]/30 text-[#5e3c00]'
+                          }`}>
+                            {isPenalized ? '⚠️ Phạt' : isCompleted ? '✓ Đã xong' : 'Chưa trực'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-[#e0e2ec]">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="material-symbols-outlined text-[18px]"
+                              style={{ color: duty.categoryColor || '#003d9b' }}
+                            >
+                              {duty.categoryIcon || 'task_alt'}
+                            </span>
+                            <span className="text-[13px] font-bold text-[#041b3c]">
+                              {duty.categoryName}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-[#003d9b] font-bold hover:underline flex items-center gap-0.5">
+                            Chi tiết <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
+
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleAddDutyOnDate(activeMobileDayStr)}
+                      className="w-full py-2 bg-[#f1f3ff] hover:bg-[#e0e8ff] text-[#003d9b] border border-[#003d9b]/30 rounded-xl text-[12px] font-extrabold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">add</span>
+                      Thêm ca trực khác cho ngày này
+                    </button>
+                  )}
                 </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Main Grid for Desktop (Hidden on mobile, visible on md+) */}
+      <div className="hidden md:grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+        {/* LEFT: Monthly Calendar Grid (4 columns) */}
+        <div className="xl:col-span-4 bg-white rounded-xl border border-[#c3c6d6] shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <div className="min-w-[750px]">
+              {/* Days of Week Header */}
+              <div className="grid grid-cols-7 border-b border-[#c3c6d6] bg-[#f1f3ff] text-center font-bold text-[13px] text-[#041b3c]">
+                {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((dayName, idx) => (
+                  <div
+                    key={dayName}
+                    className={`py-3 border-r border-[#c3c6d6] last:border-r-0 ${
+                      idx === 6 ? 'text-[#ba1a1a]' : ''
+                    }`}
+                  >
+                    {dayName}
+                  </div>
+                ))}
               </div>
-            ))}
+
+              {/* Calendar Days Matrix */}
+              <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-[#c3c6d6] bg-[#c3c6d6]">
+                {calendarDays.map((cell, idx) => (
+                  <div
+                    key={`${cell.dateStr}-${idx}`}
+                    onClick={() => cell.isCurrentMonth && isAdmin && handleAddDutyOnDate(cell.dateStr)}
+                    className={`min-h-[150px] p-2 bg-white flex flex-col transition-colors relative group ${
+                      !cell.isCurrentMonth ? 'bg-[#f9f9ff]/40 text-[#737685]/50' : isAdmin ? 'hover:bg-[#f1f3ff]/60 cursor-pointer' : ''
+                    }`}
+                  >
+                    {/* Day Header */}
+                    <div className="flex justify-between items-center mb-1">
+                      <span
+                        className={`text-[13px] font-bold w-6 h-6 rounded-full flex items-center justify-center ${
+                          cell.isToday
+                            ? 'bg-[#003d9b] text-white shadow-xs'
+                            : cell.isCurrentMonth
+                            ? 'text-[#041b3c]'
+                            : 'text-[#737685]/50'
+                        }`}
+                      >
+                        {cell.dateNumber}
+                      </span>
+
+                      {cell.isCurrentMonth && isAdmin && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddDutyOnDate(cell.dateStr);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-[#003d9b] hover:bg-[#e0e8ff] p-0.5 rounded transition-all cursor-pointer"
+                          title="Thêm nhiệm vụ"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">add</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Day Duty Assignments Badges */}
+                    <div className="space-y-1.5 flex-1 mt-1">
+                      {Object.values(
+                        cell.dayAssignments.reduce((acc, duty) => {
+                          if (!acc[duty.assignedEmployeeId]) {
+                            acc[duty.assignedEmployeeId] = {
+                              employeeName: duty.assignedEmployeeName,
+                              duties: [],
+                              isPenalized: false,
+                              hasCompleted: false,
+                              primaryColor: duty.categoryColor || '#003d9b'
+                            };
+                          }
+                          acc[duty.assignedEmployeeId].duties.push(duty);
+                          if (duty.penaltyStatus === 'penalty') acc[duty.assignedEmployeeId].isPenalized = true;
+                          if (duty.status === 'completed') acc[duty.assignedEmployeeId].hasCompleted = true;
+                          return acc;
+                        }, {} as Record<string, any>)
+                      ).map((group: any) => {
+                        const { employeeName, duties, isPenalized, hasCompleted, primaryColor } = group;
+                        const isMine = duties[0].assignedEmployeeId === (currentUser.employeeId || currentUser.id);
+                        
+                        return (
+                          <div
+                            key={duties[0].id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedAssignmentForDetail(duties[0]);
+                            }}
+                            className={`px-2 py-1.5 rounded-md text-[12px] font-bold flex flex-col justify-center cursor-pointer transition-all hover:shadow-xs border-l-[3px] border relative overflow-hidden ${
+                              isPenalized
+                                ? 'bg-[#ffdad6]/40 border-l-[#ba1a1a] border-[#ba1a1a]/30'
+                                : isMine
+                                ? 'bg-[#003d9b]/15 border-[#003d9b]/40 shadow-[0_2px_10px_rgba(0,61,155,0.15)] ring-1 ring-[#003d9b]/20'
+                                : 'bg-white'
+                            }`}
+                            style={(!isPenalized && !isMine) ? {
+                              borderLeftColor: primaryColor,
+                              backgroundColor: `${primaryColor}12`,
+                              borderColor: `${primaryColor}30`,
+                            } : {
+                              borderLeftColor: isPenalized ? '#ba1a1a' : '#003d9b'
+                            }}
+                          >
+                            <div className="flex items-center justify-between relative z-10">
+                              <span className={`font-extrabold text-[12px] truncate leading-tight flex flex-1 items-center gap-1 ${isPenalized ? 'text-[#ba1a1a]' : isMine ? 'text-[#003d9b]' : 'text-[#041b3c]'}`}>
+                                {employeeName}
+                                {isMine && <span className="bg-[#003d9b] text-white text-[9px] px-1 py-0.5 rounded uppercase tracking-wider leading-none">Bạn</span>}
+                              </span>
+                              {isPenalized ? (
+                                <span className="material-symbols-outlined text-[14px] text-[#ba1a1a] shrink-0 ml-1 font-bold" title="Bị phạt vi phạm trực nhật">
+                                  warning
+                                </span>
+                              ) : hasCompleted ? (
+                                <span className="material-symbols-outlined text-[13px] text-[#006c47] shrink-0 ml-1" title="Đã nộp ảnh">
+                                  check_circle
+                                </span>
+                              ) : null}
+                            </div>
+                            {duties.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {duties.map((d: any) => (
+                                  <span 
+                                    key={d.id} 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedAssignmentForDetail(d);
+                                    }}
+                                    className="material-symbols-outlined text-[14px] bg-white/60 rounded shadow-2xs hover:bg-white hover:scale-110 transition-all p-[1px]" 
+                                    style={{ color: d.categoryColor || '#003d9b' }}
+                                    title={d.categoryName}
+                                  >
+                                    {d.categoryIcon || 'task_alt'}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

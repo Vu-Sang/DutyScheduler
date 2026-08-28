@@ -98,43 +98,59 @@ export const OffDayRegistrationView: React.FC = () => {
 
   return (
     <div id="off-day-registration-view" className="space-y-6 animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-[28px] sm:text-[32px] font-bold text-[#041b3c] tracking-tight">
-            {isUserRole ? 'Đăng ký lịch nghỉ OFF của tôi' : 'Quản lý Lịch nghỉ Nhân viên (Off)'}
-          </h2>
-          <p className="text-[14px] text-[#434654] mt-1 font-medium">
-            {isUserRole
-              ? 'Nhấp chọn các ngày bạn muốn xin nghỉ OFF trong tháng. Nhấp "Xác nhận & Khóa lịch OFF" khi đăng ký xong.'
-              : 'Admin chọn nhân viên và đánh dấu các ngày nghỉ OFF trong tháng. Hệ thống sẽ tự né các ngày này khi xếp lịch.'}
-          </p>
+          {/* Header Banner */}
+      <div className="bg-gradient-to-r from-[#003d9b] via-[#004bb8] to-[#0052cc] rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-[26px]">event_busy</span>
+          </div>
+          <div>
+            <h2 className="text-[22px] sm:text-[26px] font-black tracking-tight text-white flex items-center gap-2">
+              {isUserRole ? 'Đăng Ký Lịch Nghỉ (OFF)' : 'Quản Lý Lịch Nghỉ Nhân Viên (OFF)'}
+            </h2>
+            <p className="text-[13px] text-white/85 font-medium mt-0.5">
+              {isUserRole
+                ? 'Đánh dấu các ngày bạn muốn đăng ký nghỉ OFF. Thuật toán tự động né ngày OFF của bạn.'
+                : 'Đánh dấu ngày nghỉ OFF cho nhân viên. Thuật toán tự động né xếp ca vào ngày nghỉ.'}
+            </p>
+          </div>
         </div>
 
-        {/* Month & Year Selection */}
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedMonth}
-            onChange={e => setSelectedMonth(Number(e.target.value))}
-            className="bg-white border border-[#c3c6d6] text-[#041b3c] font-medium text-[14px] px-3 py-2 rounded-md focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none cursor-pointer"
-          >
-            {months.map(m => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={selectedYear}
-            onChange={e => setSelectedYear(Number(e.target.value))}
-            className="bg-white border border-[#c3c6d6] text-[#041b3c] font-medium text-[14px] px-3 py-2 rounded-md focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none cursor-pointer"
-          >
-            {years.map(y => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+        {/* Controls Bar */}
+        <div className="flex flex-wrap items-center gap-2 bg-white/15 backdrop-blur-md p-1.5 rounded-xl border border-white/30 shrink-0 self-stretch sm:self-auto justify-between sm:justify-end">
+          {isAdmin && (
+            <select
+              value={selectedEmployeeId}
+              onChange={e => setSelectedEmployeeId(e.target.value)}
+              className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs max-w-[160px] truncate"
+            >
+              {employees.map(e => (
+                <option key={e.id} value={e.id}>{e.name}</option>
+              ))}
+            </select>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            <select
+              value={selectedMonth}
+              onChange={e => setSelectedMonth(Number(e.target.value))}
+              className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
+            >
+              {months.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+
+            <select
+              value={selectedYear}
+              onChange={e => setSelectedYear(Number(e.target.value))}
+              className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
+            >
+              {years.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

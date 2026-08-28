@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDuty } from '../../context/DutyContext';
 import { Employee } from '../../types';
 
+import { EmployeeScheduleModal } from '../modals/EmployeeScheduleModal';
+
 export const EmployeeManagementView: React.FC = () => {
   const {
     employees,
@@ -15,6 +17,7 @@ export const EmployeeManagementView: React.FC = () => {
 
   const [selectedDept, setSelectedDept] = useState<string>('all');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [selectedEmployeeForSchedule, setSelectedEmployeeForSchedule] = useState<Employee | null>(null);
 
   const departments = ['all', ...Array.from(new Set(employees.map(e => e.department)))];
 
@@ -45,20 +48,26 @@ export const EmployeeManagementView: React.FC = () => {
   };
 
   const handleViewSchedule = (emp: Employee) => {
-    setActiveTab('calendar');
+    setSelectedEmployeeForSchedule(emp);
+    setActiveMenuId(null);
   };
 
   return (
     <div id="employee-management-view" className="space-y-6 animate-in fade-in duration-200">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-[28px] sm:text-[32px] font-bold text-[#041b3c] tracking-tight">
-            Quản lý nhân viên
-          </h2>
-          <p className="text-[14px] text-[#434654] mt-1 font-medium">
-            Quản lý danh sách nhân sự tham gia trực nhật và theo dõi hiệu suất công việc.
-          </p>
+      {/* Page Header Banner */}
+      <div className="bg-gradient-to-r from-[#003d9b] via-[#004bb8] to-[#0052cc] rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-[26px]">group</span>
+          </div>
+          <div>
+            <h2 className="text-[22px] sm:text-[26px] font-black tracking-tight text-white flex items-center gap-2">
+              Quản Lý Nhân Viên
+            </h2>
+            <p className="text-[13px] text-white/85 font-medium mt-0.5">
+              Quản lý danh sách nhân sự tham gia trực nhật và theo dõi hiệu suất làm việc.
+            </p>
+          </div>
         </div>
 
         <button
@@ -67,7 +76,7 @@ export const EmployeeManagementView: React.FC = () => {
             setEditingEmployee(null);
             setEmployeeModalOpen(true);
           }}
-          className="bg-[#003d9b] hover:bg-[#0052cc] text-white px-4 py-2.5 rounded-md font-semibold text-[13px] transition-colors shadow-xs flex items-center gap-2"
+          className="bg-white text-[#003d9b] hover:bg-white/90 px-4 py-2.5 rounded-xl font-extrabold text-[13px] transition-all shadow-xs flex items-center gap-2 cursor-pointer shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           Thêm nhân viên mới
@@ -117,7 +126,8 @@ export const EmployeeManagementView: React.FC = () => {
             <div
               key={emp.id}
               id={`employee-card-${emp.id}`}
-              className="bg-white rounded-lg border border-[#c3c6d6] p-5 flex flex-col hover:border-[#003d9b] transition-all hover:shadow-md relative overflow-hidden group min-h-[220px]"
+              onClick={() => setSelectedEmployeeForSchedule(emp)}
+              className="bg-white rounded-xl border border-[#c3c6d6] p-5 flex flex-col hover:border-[#003d9b] transition-all hover:shadow-md relative overflow-hidden group min-h-[220px] cursor-pointer"
             >
               {/* Left Color Stripe */}
               <div
@@ -151,7 +161,7 @@ export const EmployeeManagementView: React.FC = () => {
                 </div>
 
                 {/* 3-dots Menu Toggle */}
-                <div className="relative">
+                <div className="relative" onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => setActiveMenuId(activeMenuId === emp.id ? null : emp.id)}
                     className="text-[#737685] hover:text-[#003d9b] p-1 rounded-full hover:bg-[#f1f3ff] transition-colors"
@@ -244,6 +254,11 @@ export const EmployeeManagementView: React.FC = () => {
           );
         })}
       </div>
+      {/* Popup Modal: Employee Duty Schedule & Performance */}
+      <EmployeeScheduleModal
+        employee={selectedEmployeeForSchedule}
+        onClose={() => setSelectedEmployeeForSchedule(null)}
+      />
     </div>
   );
 };

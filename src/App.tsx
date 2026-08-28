@@ -9,6 +9,7 @@ import { OffDayRegistrationView } from './components/offdays/OffDayRegistrationV
 import { CategoryManagementView } from './components/categories/CategoryManagementView';
 import { EmployeeManagementView } from './components/employees/EmployeeManagementView';
 import { UserPortalView } from './components/user/UserPortalView';
+import { UserSummaryView } from './components/user/UserSummaryView';
 
 import { CreateShiftModal } from './components/modals/CreateShiftModal';
 import { ShiftDetailModal } from './components/modals/ShiftDetailModal';
@@ -41,6 +42,7 @@ const MainAppContent: React.FC = () => {
         {/* Dynamic View Body */}
         <main className="flex-1 mt-16 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
           {activeTab === 'my_schedule' && <UserPortalView />}
+          {activeTab === 'my_summary' && <UserSummaryView />}
           {activeTab === 'calendar' && <MonthlyCalendarView />}
           {activeTab === 'offdays' && <OffDayRegistrationView />}
           {activeTab === 'categories' && <CategoryManagementView />}

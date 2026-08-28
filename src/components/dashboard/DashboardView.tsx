@@ -1,5 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDuty } from '../../context/DutyContext';
+import { Employee } from '../../types';
+import { AvatarImage } from '../common/AvatarImage';
+import { EmployeeScheduleModal } from '../modals/EmployeeScheduleModal';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -12,6 +15,8 @@ export const DashboardView: React.FC = () => {
     setSelectedYear,
     setSelectedAssignmentForDetail,
   } = useDuty();
+
+  const [selectedEmployeeForSchedule, setSelectedEmployeeForSchedule] = useState<Employee | null>(null);
 
   const months = [
     { value: 0, label: 'Tháng 1' },
@@ -69,40 +74,42 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div id="dashboard-view" className="space-y-6 animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-[28px] sm:text-[32px] font-bold text-[#041b3c] tracking-tight flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-[32px] text-[#003d9b]">analytics</span>
-            Báo cáo Dashboard & Phạt Vi Phạm
-          </h2>
-          <p className="text-[14px] text-[#434654] mt-1 font-medium">
-            Thống kê hiệu suất trực nhật, tỉ lệ hoàn thành và tổng tiền phạt tiền vi phạm theo từng nhân viên.
-          </p>
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-[#003d9b] via-[#004bb8] to-[#0052cc] rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-[26px]">dashboard</span>
+          </div>
+          <div>
+            <h2 className="text-[22px] sm:text-[26px] font-black tracking-tight text-white flex items-center gap-2">
+              Bảng Điều Khiển & Phạt Vi Phạm
+            </h2>
+            <p className="text-[13px] text-white/85 font-medium mt-0.5">
+              Thống kê tổng quan hiệu suất trực nhật toàn cơ quan, tỷ lệ hoàn thành và tổng tiền phạt.
+            </p>
+          </div>
         </div>
 
-        {/* Month & Year Selection */}
-        <div className="flex items-center gap-2">
+        {/* Controls Bar */}
+        <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md p-1.5 rounded-xl border border-white/30 shrink-0 self-end sm:self-auto">
+          <span className="material-symbols-outlined text-white/80 text-[20px] ml-1">calendar_month</span>
           <select
             value={selectedMonth}
             onChange={e => setSelectedMonth(Number(e.target.value))}
-            className="bg-white border border-[#c3c6d6] text-[#041b3c] font-bold text-[14px] px-3.5 py-2 rounded-md focus:border-[#003d9b] outline-none cursor-pointer shadow-2xs"
+            className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
           >
             {months.map(m => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
+              <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
+
           <select
             value={selectedYear}
             onChange={e => setSelectedYear(Number(e.target.value))}
-            className="bg-white border border-[#c3c6d6] text-[#041b3c] font-bold text-[14px] px-3.5 py-2 rounded-md focus:border-[#003d9b] outline-none cursor-pointer shadow-2xs"
+            className="bg-white text-[#041b3c] font-extrabold text-[13px] px-3 py-1.5 rounded-lg outline-none cursor-pointer shadow-xs"
           >
             {years.map(y => (
-              <option key={y} value={y}>
-                {y}
-              </option>
+              <option key={y} value={y}>{y}</option>
             ))}
           </select>
         </div>
@@ -211,17 +218,21 @@ export const DashboardView: React.FC = () => {
                   </tr>
                 ) : (
                   employeePerformanceList.map(emp => (
-                    <tr key={emp.id} className="hover:bg-[#f1f3ff]/50 transition-colors">
+                    <tr
+                      key={emp.id}
+                      onClick={() => {
+                        const fullEmpObj = employees.find(e => e.id === emp.id);
+                        if (fullEmpObj) setSelectedEmployeeForSchedule(fullEmpObj);
+                      }}
+                      className="hover:bg-[#e0e8ff]/70 transition-colors cursor-pointer"
+                      title="Bấm để xem lịch trực & chi tiết cá nhân"
+                    >
                       {/* Name & Avatar */}
                       <td className="p-3.5 font-bold text-[#041b3c]">
                         <div className="flex items-center gap-2.5">
-                          {emp.avatar ? (
-                            <img src={emp.avatar} alt={emp.name} className="w-8 h-8 rounded-full object-cover border border-[#c3c6d6]" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-[#003d9b] text-white font-bold text-[11px] flex items-center justify-center">
-                              {emp.name.slice(0, 2).toUpperCase()}
-                            </div>
-                          )}
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-[#c3c6d6]">
+                            <AvatarImage src={emp.avatar} name={emp.name} />
+                          </div>
                           <div>
                             <p className="leading-tight">{emp.name}</p>
                             <p className="text-[11px] text-[#737685] font-normal">{emp.role}</p>
@@ -334,6 +345,11 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Popup Modal: Employee Duty Schedule & Performance */}
+      <EmployeeScheduleModal
+        employee={selectedEmployeeForSchedule}
+        onClose={() => setSelectedEmployeeForSchedule(null)}
+      />
     </div>
   );
 };

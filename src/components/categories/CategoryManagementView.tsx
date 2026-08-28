@@ -23,20 +23,25 @@ export const CategoryManagementView: React.FC = () => {
 
   return (
     <div id="category-management-view" className="space-y-6 animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-[28px] sm:text-[32px] font-bold text-[#041b3c] tracking-tight">
-            Danh mục Công việc Trực nhật
-          </h2>
-          <p className="text-[14px] text-[#434654] mt-1 font-medium">
-            Quản lý các hạng mục công việc lao động & vệ sinh (Quét nhà, Lau nhà, Đổ rác...).
-          </p>
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-[#003d9b] via-[#004bb8] to-[#0052cc] rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+            <span className="material-symbols-outlined text-[26px]">cleaning_services</span>
+          </div>
+          <div>
+            <h2 className="text-[22px] sm:text-[26px] font-black tracking-tight text-white flex items-center gap-2">
+              Danh Mục Công Việc Trực Nhật
+            </h2>
+            <p className="text-[13px] text-white/85 font-medium mt-0.5">
+              Tùy chỉnh và quản lý danh mục công việc lao động & vệ sinh (Quét nhà, lau nhà, đổ rác...).
+            </p>
+          </div>
         </div>
 
         <button
           onClick={handleCreate}
-          className="bg-[#003d9b] hover:bg-[#0052cc] text-white px-4 py-2 rounded-md font-semibold text-[13px] transition-colors shadow-xs flex items-center gap-2"
+          className="bg-white text-[#003d9b] hover:bg-white/90 px-4 py-2.5 rounded-xl font-extrabold text-[13px] transition-all shadow-xs flex items-center gap-2 cursor-pointer shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">add_circle</span>
           Thêm Hạng mục Công việc
