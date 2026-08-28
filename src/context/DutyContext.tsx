@@ -270,7 +270,7 @@ export const DutyProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setCurrentUser(adminUser);
     setIsLoggedIn(true);
-    setActiveTab('calendar');
+    setActiveTab('my_schedule');
   };
 
   const loginAsEmployee = (empId: string) => {

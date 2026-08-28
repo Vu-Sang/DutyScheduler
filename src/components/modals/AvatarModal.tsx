@@ -119,18 +119,16 @@ export const AvatarModal: React.FC<AvatarModalProps> = ({ isOpen, onClose }) => 
                 <button
                   type="button"
                   onClick={() => setActiveTab('animals')}
-                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
-                    activeTab === 'animals' ? 'bg-[#003d9b] text-white shadow-2xs' : 'text-[#434654]'
-                  }`}
+                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${activeTab === 'animals' ? 'bg-[#003d9b] text-white shadow-2xs' : 'text-[#434654]'
+                    }`}
                 >
                   🐾 Thú cưng ({ANIMAL_AVATARS.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('minimal')}
-                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
-                    activeTab === 'minimal' ? 'bg-[#003d9b] text-white shadow-2xs' : 'text-[#434654]'
-                  }`}
+                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${activeTab === 'minimal' ? 'bg-[#003d9b] text-white shadow-2xs' : 'text-[#434654]'
+                    }`}
                 >
                   👤 Màu sắc
                 </button>
@@ -149,11 +147,10 @@ export const AvatarModal: React.FC<AvatarModalProps> = ({ isOpen, onClose }) => 
                       className={`flex flex-col items-center gap-1 group cursor-pointer`}
                     >
                       <div
-                        className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all p-0.5 ${
-                          isSelected
+                        className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all p-0.5 ${isSelected
                             ? 'border-[#003d9b] ring-4 ring-[#003d9b]/25 scale-105 shadow-md'
                             : 'border-[#c3c6d6] group-hover:border-[#003d9b] opacity-90 group-hover:opacity-100'
-                        }`}
+                          }`}
                       >
                         <img src={item.url} alt={item.name} className="w-full h-full object-cover rounded-full" />
                       </div>
@@ -173,11 +170,10 @@ export const AvatarModal: React.FC<AvatarModalProps> = ({ isOpen, onClose }) => 
                       key={idx}
                       type="button"
                       onClick={() => setSelectedAvatar(svgUrl)}
-                      className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all p-0.5 mx-auto cursor-pointer ${
-                        isSelected
+                      className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all p-0.5 mx-auto cursor-pointer ${isSelected
                           ? 'border-[#003d9b] ring-4 ring-[#003d9b]/25 scale-105 shadow-md'
                           : 'border-[#c3c6d6] hover:border-[#003d9b] opacity-80 hover:opacity-100'
-                      }`}
+                        }`}
                     >
                       <img src={svgUrl} alt={`Minimal preset ${idx + 1}`} className="w-full h-full object-cover rounded-full" />
                     </button>

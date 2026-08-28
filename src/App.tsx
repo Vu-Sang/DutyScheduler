@@ -27,7 +27,7 @@ const MainAppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9ff] text-[#041b3c] flex">
+    <div className="min-h-screen bg-slate-100/70 text-slate-900 flex font-sans">
       {/* Sidebar Navigation */}
       <Sidebar
         mobileOpen={mobileSidebarOpen}

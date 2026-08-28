@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
       {/* Mobile Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-30 md:hidden backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 bg-slate-950/60 z-30 md:hidden backdrop-blur-xs transition-opacity"
           onClick={onCloseMobile}
           aria-hidden="true"
         />
@@ -51,19 +51,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
 
       <aside
         id="main-sidebar"
-        className={`fixed left-0 top-0 h-screen w-64 bg-[#f1f3ff] border-r border-[#c3c6d6] flex flex-col py-6 z-40 transition-transform duration-200 ease-in-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        className={`fixed left-0 top-0 h-screen w-64 bg-slate-900 border-r border-slate-800 flex flex-col py-6 z-40 transition-transform duration-200 ease-in-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           }`}
       >
         {/* Brand Header */}
-        <div className="px-6 mb-6 flex items-center justify-between">
+        <div className="px-5 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#003d9b] flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              DS
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm tracking-wider shadow-md shadow-blue-600/30">
+              AE
             </div>
             <div>
-              <h1 className="text-[22px] leading-7 font-bold text-[#003d9b] tracking-tight">DutyScheduler</h1>
-              <p className="text-[12px] leading-4 text-[#434654] font-medium">
-                {isUserRole ? 'Giao diện Nhân viên' : 'Phân công trực nhật'}
+              <h1 className="text-[17px] leading-5 font-black text-white tracking-tight">Lịch Trực AE Media</h1>
+              <p className="text-[11px] leading-4 text-slate-400 font-semibold mt-0.5">
+                {isUserRole ? 'Cổng Nhân Viên' : 'Hệ Thống Phân Công'}
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="md:hidden p-1 text-[#434654] hover:text-[#003d9b]"
+              className="md:hidden p-1 text-slate-400 hover:text-white"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
         </div>
 
         {/* Navigation List */}
-        <ul className="flex flex-col gap-1 px-3 flex-1">
+        <ul className="flex flex-col gap-1.5 px-3 flex-1">
           {navItems.map(item => {
             const isActive = activeTab === item.id;
             return (
@@ -88,14 +88,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
                 <button
                   id={`nav-btn-${item.id}`}
                   onClick={() => handleNavClick(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-left text-[14px] transition-all duration-200 ease-in-out cursor-pointer ${isActive
-                    ? 'text-[#003d9b] font-bold bg-[#0052cc]/10 border-r-4 border-[#003d9b]'
-                    : 'text-[#434654] font-medium hover:text-[#003d9b] hover:bg-[#e0e8ff]'
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-[13.5px] transition-all duration-200 ease-in-out cursor-pointer ${isActive
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md shadow-blue-600/30'
+                    : 'text-slate-400 font-medium hover:text-slate-100 hover:bg-slate-800/80'
                     }`}
                 >
-                  <div className="flex items-center gap-3.5">
+                  <div className="flex items-center gap-3">
                     <span
-                      className="material-symbols-outlined text-[22px]"
+                      className="material-symbols-outlined text-[20px]"
                       style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                     >
                       {item.icon}
@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
                   </div>
 
                   {item.badge !== undefined && (
-                    <span className="bg-[#ba1a1a] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                    <span className="bg-rose-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-xs">
                       {item.badge}
                     </span>
                   )}
@@ -115,24 +115,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
         </ul>
 
         {/* User Profile Card Footer */}
-        <div className="px-4 pt-4 border-t border-[#c3c6d6] flex flex-col gap-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-white/60 border border-[#c3c6d6]">
+        <div className="px-3 pt-4 border-t border-slate-800 flex flex-col gap-2">
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-[#c3c6d6] shadow-2xs">
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-600 shadow-sm bg-slate-700">
                 <AvatarImage src={currentUser.avatar} name={currentUser.name} />
               </div>
               <div className="overflow-hidden">
-                <p className="text-[13px] font-bold text-[#041b3c] truncate">{currentUser.name}</p>
-                <p className="text-[11px] text-[#737685] truncate">{currentUser.role}</p>
+                <p className="text-[13px] font-bold text-white truncate">{currentUser.name}</p>
+                <p className="text-[11px] text-slate-400 font-semibold truncate">{currentUser.role}</p>
               </div>
             </div>
 
             <button
               onClick={logout}
-              className="p-1.5 text-[#737685] hover:text-[#ba1a1a] hover:bg-[#ffdad6] rounded transition-colors"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
               title="Đăng xuất"
             >
-              <span className="material-symbols-outlined text-[20px]">logout</span>
+              <span className="material-symbols-outlined text-[18px]">logout</span>
             </button>
           </div>
         </div>
@@ -140,3 +140,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
     </>
   );
 };
+

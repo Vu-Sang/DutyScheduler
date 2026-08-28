@@ -52,23 +52,28 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
     <>
       <header
         id="top-app-header"
-        className="fixed top-0 right-0 left-0 md:left-64 h-16 bg-white border-b border-[#c3c6d6] flex justify-between items-center px-4 md:px-8 z-30 shadow-xs"
+        className="fixed top-0 right-0 left-0 md:left-64 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 flex justify-between items-center px-4 md:px-8 z-30 shadow-xs"
       >
         {/* Mobile Menu & Logo */}
         <div className="flex items-center gap-3 md:hidden">
           <button
             onClick={onToggleMobileMenu}
-            className="p-2 -ml-2 text-[#041b3c] hover:bg-[#f1f3ff] rounded-lg transition-colors cursor-pointer"
+            className="p-2 -ml-2 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
             aria-label="Mở menu"
           >
             <span className="material-symbols-outlined text-[24px]">menu</span>
           </button>
-          <span className="text-[18px] font-bold text-[#003d9b]">DutyScheduler</span>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs">
+              AE
+            </div>
+            <span className="text-[16px] font-black text-slate-900 tracking-tight">AE Media</span>
+          </div>
         </div>
 
         {/* Search Input Bar */}
         <div className="hidden sm:flex flex-1 max-w-md relative items-center">
-          <span className="material-symbols-outlined absolute left-3 text-[#737685] text-[20px] pointer-events-none">
+          <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
             search
           </span>
           <input
@@ -76,13 +81,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Tìm kiếm nhân viên, công việc trực..."
-            className="w-full pl-10 pr-8 py-2 bg-[#f9f9ff] border border-[#c3c6d6] rounded-md text-[14px] text-[#041b3c] placeholder-[#737685] focus:bg-white focus:border-[#003d9b] focus:ring-1 focus:ring-[#003d9b] outline-none transition-all"
+            placeholder="Tìm kiếm nhân viên, ca trực nhật..."
+            className="w-full pl-11 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 outline-none transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 text-[#737685] hover:text-[#041b3c] p-1"
+              className="absolute right-2.5 text-slate-400 hover:text-slate-700 p-1"
             >
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
@@ -96,23 +101,23 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
             <button
               id="notifications-btn"
               onClick={() => setNotifOpen(!notifOpen)}
-              className="p-2 rounded-full text-[#434654] hover:text-[#003d9b] hover:bg-[#f1f3ff] transition-colors relative cursor-pointer"
+              className="p-2 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-slate-100 transition-colors relative cursor-pointer"
               aria-label="Thông báo"
             >
               <span className="material-symbols-outlined text-[22px]">notifications</span>
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#ba1a1a] rounded-full ring-2 ring-white animate-pulse" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse" />
               )}
             </button>
 
             {/* Notifications Dropdown */}
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-[#c3c6d6] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 py-2 border-b border-[#c3c6d6]/60 flex items-center justify-between">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-[14px] text-[#041b3c]">Thông báo</h4>
+                    <h4 className="font-extrabold text-sm text-slate-900">Thông báo</h4>
                     {unreadCount > 0 && (
-                      <span className="bg-[#ba1a1a] text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                      <span className="bg-rose-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full">
                         {unreadCount} mới
                       </span>
                     )}
@@ -120,16 +125,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
                   {unreadCount > 0 && (
                     <button
                       onClick={clearAllNotifications}
-                      className="text-[12px] text-[#003d9b] hover:underline font-medium cursor-pointer"
+                      className="text-xs text-blue-700 hover:underline font-bold cursor-pointer"
                     >
                       Đọc tất cả
                     </button>
                   )}
                 </div>
 
-                <div className="max-h-72 overflow-y-auto divide-y divide-[#c3c6d6]/30">
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
                   {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-[#737685] text-[13px]">
+                    <div className="p-6 text-center text-slate-400 text-xs font-semibold">
                       Không có thông báo mới
                     </div>
                   ) : (
@@ -137,17 +142,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
                       <div
                         key={notif.id}
                         onClick={() => markNotificationAsRead(notif.id)}
-                        className={`p-3.5 hover:bg-[#f1f3ff] transition-colors cursor-pointer flex gap-3 items-start ${
-                          !notif.read ? 'bg-[#f1f3ff]/60' : ''
+                        className={`p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3 items-start ${
+                          !notif.read ? 'bg-blue-50/50' : ''
                         }`}
                       >
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                             notif.type === 'offday'
-                              ? 'bg-[#ffca81]/30 text-[#5e3c00]'
+                              ? 'bg-amber-100 text-amber-800'
                               : notif.type === 'shift'
-                              ? 'bg-[#b2c5ff]/40 text-[#003d9b]'
-                              : 'bg-[#82f9be]/30 text-[#006c47]'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-emerald-100 text-emerald-800'
                           }`}
                         >
                           <span className="material-symbols-outlined text-[18px]">
@@ -160,12 +165,12 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
                         </div>
                         <div className="flex-1 overflow-hidden">
                           <div className="flex items-center justify-between mb-0.5">
-                            <p className="font-semibold text-[13px] text-[#041b3c] truncate">
+                            <p className="font-bold text-xs text-slate-900 truncate">
                               {notif.title}
                             </p>
-                            <span className="text-[11px] text-[#737685] shrink-0">{notif.time}</span>
+                            <span className="text-[10px] text-slate-400 shrink-0 font-medium">{notif.time}</span>
                           </div>
-                          <p className="text-[12px] text-[#434654] leading-relaxed">
+                          <p className="text-[12px] text-slate-600 leading-relaxed font-medium">
                             {notif.message}
                           </p>
                         </div>
@@ -182,7 +187,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
             <button
               id="settings-btn"
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className="p-2 rounded-full text-[#434654] hover:text-[#003d9b] hover:bg-[#f1f3ff] transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-slate-100 transition-colors cursor-pointer"
               aria-label="Cài đặt hệ thống"
             >
               <span className="material-symbols-outlined text-[22px]">settings</span>
@@ -190,19 +195,19 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
 
             {/* Quick Settings Dropdown */}
             {settingsOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-[#c3c6d6] p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <h4 className="font-bold text-[14px] text-[#041b3c] mb-3">Tuỳ chọn hệ thống</h4>
-                <div className="space-y-3 text-[13px]">
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <h4 className="font-extrabold text-sm text-slate-900 mb-3">Tuỳ chọn hệ thống</h4>
+                <div className="space-y-3 text-xs font-semibold">
                   <div className="flex items-center justify-between">
-                    <span className="text-[#434654]">Hệ thống</span>
-                    <span className="font-medium text-[#003d9b] bg-[#0052cc]/10 px-2 py-0.5 rounded text-[12px]">
-                      Phân công Trực nhật
+                    <span className="text-slate-600">Hệ thống</span>
+                    <span className="font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg text-[11px] border border-blue-200/60">
+                      AE Media Internal
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#434654]">Thuật toán xếp lịch</span>
-                    <span className="text-[#006c47] font-semibold flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-[#006c47]" /> Né ngày OFF
+                    <span className="text-slate-600">Thuật toán xếp lịch</span>
+                    <span className="text-emerald-700 font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Né ngày OFF
                     </span>
                   </div>
                 </div>
@@ -215,17 +220,17 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
             <button
               id="user-profile-menu-btn"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="w-9 h-9 rounded-full overflow-hidden border border-[#c3c6d6] hover:ring-2 hover:ring-[#003d9b] transition-all flex items-center justify-center bg-[#003d9b] text-white font-bold cursor-pointer shadow-2xs"
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-slate-200 hover:border-blue-600 transition-all flex items-center justify-center bg-blue-700 text-white font-bold cursor-pointer shadow-xs"
               aria-label="Menu tài khoản"
             >
               <AvatarImage src={currentUser.avatar} name={currentUser.name} />
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-[#c3c6d6] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1">
-                <div className="px-4 py-2 border-b border-[#c3c6d6]/60 bg-[#f9f9ff]">
-                  <p className="font-bold text-[14px] text-[#041b3c]">{currentUser.name}</p>
-                  <p className="text-[12px] text-[#737685] font-medium">{currentUser.role}</p>
+              <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-1">
+                <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+                  <p className="font-extrabold text-sm text-slate-900">{currentUser.name}</p>
+                  <p className="text-xs text-slate-500 font-semibold">{currentUser.role}</p>
                 </div>
 
                 <button
@@ -233,9 +238,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
                     setUserMenuOpen(false);
                     setAvatarModalOpen(true);
                   }}
-                  className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#041b3c] hover:bg-[#f1f3ff] flex items-center gap-2 transition-colors cursor-pointer"
+                  className="w-full px-4 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2 transition-colors cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-[#003d9b]">account_circle</span>
+                  <span className="material-symbols-outlined text-[18px] text-blue-700">account_circle</span>
                   Đổi ảnh đại diện
                 </button>
 
@@ -244,19 +249,19 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onToggleMobileMenu }) => {
                     setUserMenuOpen(false);
                     setPasswordModalOpen(true);
                   }}
-                  className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#041b3c] hover:bg-[#f1f3ff] flex items-center gap-2 transition-colors cursor-pointer"
+                  className="w-full px-4 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2 transition-colors cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-[#003d9b]">lock_reset</span>
+                  <span className="material-symbols-outlined text-[18px] text-blue-700">lock_reset</span>
                   Đổi mật khẩu
                 </button>
 
-                <div className="border-t border-[#c3c6d6]/60 pt-1">
+                <div className="border-t border-slate-100 pt-1">
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
                       logout();
                     }}
-                    className="w-full px-4 py-2 text-left text-[13px] font-bold text-[#ba1a1a] hover:bg-[#ffdad6]/30 flex items-center gap-2 transition-colors cursor-pointer"
+                    className="w-full px-4 py-2 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[18px]">logout</span>
                     Đăng xuất
